@@ -60,8 +60,25 @@ export async function loadTemplate(path) {
 
 // Load header and footer
 export async function loadHeaderFooter() {
-  const headerTemplate = await loadTemplate("../partials/header.html");
-  const footerTemplate = await loadTemplate("../partials/footer.html");
+  // Determine the correct path based on current location
+  const path = window.location.pathname;
+  let headerPath = "/partials/header.html";
+  let footerPath = "/partials/footer.html";
+  
+  // Adjust paths for subdirectories
+  if (path.includes("/cart/")) {
+    headerPath = "../partials/header.html";
+    footerPath = "../partials/footer.html";
+  } else if (path.includes("/product_pages/")) {
+    headerPath = "../partials/header.html";
+    footerPath = "../partials/footer.html";
+  } else if (path.includes("/checkout/")) {
+    headerPath = "../partials/header.html";
+    footerPath = "../partials/footer.html";
+  }
+  
+  const headerTemplate = await loadTemplate(headerPath);
+  const footerTemplate = await loadTemplate(footerPath);
   
   const headerElement = document.querySelector("#main-header");
   const footerElement = document.querySelector("#main-footer");
