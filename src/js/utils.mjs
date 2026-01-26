@@ -51,38 +51,37 @@ export function renderWithTemplate(template, parentElement, data, callback) {
   }
 }
 
+// ...existing code...
 // Load template from a file
 export async function loadTemplate(path) {
   const res = await fetch(path);
+  if (!res.ok) {
+    throw new Error(`Failed to load template: ${path} (${res.status})`);
+  }
   const template = await res.text();
   return template;
 }
 
 // Load header and footer
 export async function loadHeaderFooter() {
-  // Determine the correct path based on current location
-  const path = window.location.pathname;
-  let headerPath = "/partials/header.html";
-  let footerPath = "/partials/footer.html";
-  
-  // Adjust paths for subdirectories
-  if (path.includes("/cart/")) {
-    headerPath = "../partials/header.html";
-    footerPath = "../partials/footer.html";
-  } else if (path.includes("/product_pages/")) {
-    headerPath = "../partials/header.html";
-    footerPath = "../partials/footer.html";
-  } else if (path.includes("/checkout/")) {
-    headerPath = "../partials/header.html";
-    footerPath = "../partials/footer.html";
+  // Construct partials path relative to this module so it works on GH Pages
+  const partialsBase = new URL("../partials/", import.meta.url);
+  const headerPath = new URL("header.html", partialsBase).href;
+  const footerPath = new URL("footer.html", partialsBase).href;
+
+  try {
+    const [headerTemplate, footerTemplate] = await Promise.all([
+      loadTemplate(headerPath),
+      loadTemplate(footerPath),
+    ]);
+
+    const headerElement = document.querySelector("#main-header");
+    const footerElement = document.querySelector("#main-footer");
+
+    if (headerElement) renderWithTemplate(headerTemplate, headerElement);
+    if (footerElement) renderWithTemplate(footerTemplate, footerElement);
+  } catch (err) {
+    console.error("Error loading header/footer:", err);
   }
-  
-  const headerTemplate = await loadTemplate(headerPath);
-  const footerTemplate = await loadTemplate(footerPath);
-  
-  const headerElement = document.querySelector("#main-header");
-  const footerElement = document.querySelector("#main-footer");
-  
-  renderWithTemplate(headerTemplate, headerElement);
-  renderWithTemplate(footerTemplate, footerElement);
 }
+// ...existing code...
