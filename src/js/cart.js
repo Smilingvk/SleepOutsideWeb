@@ -7,12 +7,12 @@ function renderCartContents() {
   // Check if cart is empty
   if (cartItems.length === 0) {
     productListElement.innerHTML = `
-      <li class="cart-card divider" style="list-style: none; text-align: center; padding: 2rem;">
-        <p style="font-size: 1.2em; margin-bottom: 1rem; color: var(--dark-grey);">Your cart is empty</p>
-        <a href="/index.html" style="color: var(--secondary-color); text-decoration: underline;">
+      <div style="text-align: center; padding: 2rem; color: var(--dark-grey);">
+        <p style="font-size: 1.2em; margin-bottom: 1rem;">Your cart is empty</p>
+        <a href="../index.html" style="color: var(--secondary-color); text-decoration: underline;">
           Continue Shopping
         </a>
-      </li>
+      </div>
     `;
     // Hide cart total section if it exists
     const cartFooter = document.querySelector('.cart-footer');
@@ -58,20 +58,19 @@ function renderCartTotal(cartItems) {
   let cartFooter = document.querySelector('.cart-footer');
   
   if (!cartFooter) {
-    // Create cart footer section as a list item to match the structure
-    cartFooter = document.createElement('li');
+    // Create cart footer section
+    cartFooter = document.createElement('div');
     cartFooter.className = 'cart-footer';
     cartFooter.style.cssText = `
-      list-style: none;
       margin-top: 2rem;
       padding: 1rem;
       border-top: 2px solid var(--primary-color);
       text-align: right;
     `;
     
-    // Insert after last cart item
-    const productList = document.querySelector('.product-list');
-    productList.appendChild(cartFooter);
+    // Insert after product list
+    const productSection = document.querySelector('.products');
+    productSection.appendChild(cartFooter);
   }
   
   // Update cart footer content
@@ -80,7 +79,7 @@ function renderCartTotal(cartItems) {
       <strong>Items in Cart:</strong> ${itemCount}
     </p>
     <p style="font-size: 1.3em; color: var(--tertiary-color); font-weight: bold;">
-      <strong>Total:</strong> ${total.toFixed(2)}
+      <strong>Total:</strong> $${total.toFixed(2)}
     </p>
   `;
   
