@@ -3,10 +3,7 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  root: "src", // <- quitar la barra final
-
-  // Si despliegas en GitHub Pages, descomenta y ajusta:
-  // base: "/NOMBRE_DEL_REPO/",
+  root: "src",
 
   build: {
     outDir: "../dist",

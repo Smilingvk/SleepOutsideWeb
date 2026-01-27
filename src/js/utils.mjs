@@ -66,63 +66,60 @@ export async function loadTemplate(path) {
   }
 }
 
-// Load header and footer
 export async function loadHeaderFooter() {
   try {
-    // Get current path to determine location
-    const currentPath = window.location.pathname;
-    
-    // Determine relative path to partials based on current directory
-    let partialsPath = './partials';
-    
-    // If we're in a subdirectory, go up one level
-    if (currentPath.includes('/cart/') || 
-        currentPath.includes('/product_pages/') || 
-        currentPath.includes('/checkout/')) {
-      partialsPath = '../partials';
+    const base = import.meta?.env?.BASE_URL || "";
+    const headerCandidates = [
+      "./partials/header.html",
+      "../partials/header.html",
+      "./public/partials/header.html",
+      "../public/partials/header.html",
+      base + "partials/header.html",
+      base + "public/partials/header.html",
+      // probar la ruta que usaste en GH Pages (source dentro de repo)
+      base + "src/partials/header.html",
+      // fallback absoluto sobre origin + pathname (intento más agresivo)
+      `${location.origin}${location.pathname.replace(/\/[^/]*$/, "/")}src/partials/header.html`,
+      `${location.origin}${location.pathname.replace(/\/[^/]*$/, "/")}partials/header.html`,
+    ];
+    const footerCandidates = headerCandidates.map((p) =>
+      p.replace("header.html", "footer.html")
+    );
+
+    async function tryLoadAny(list) {
+      for (const p of list) {
+        try {
+          console.debug("Trying template path:", p);
+          const tpl = await loadTemplate(p);
+          console.debug("Loaded template from:", p);
+          return { tpl, path: p };
+        } catch (e) {
+          console.warn("Template not found at:", p);
+        }
+      }
+      throw new Error("No candidate path succeeded");
     }
-    
-    console.log('Loading partials from:', partialsPath);
-    
-    const headerTemplate = await loadTemplate(`${partialsPath}/header.html`);
-    const footerTemplate = await loadTemplate(`${partialsPath}/footer.html`);
-    
-    const headerElement = document.querySelector("#main-header");
-    const footerElement = document.querySelector("#main-footer");
-    
+
+    const headerResult = await tryLoadAny(headerCandidates);
+    const footerResult = await tryLoadAny(footerCandidates);
+
+    const headerElement =
+      document.querySelector("#main-header") || document.querySelector("header");
+    const footerElement =
+      document.querySelector("#main-footer") || document.querySelector("footer");
+
     if (!headerElement || !footerElement) {
-      console.error('Header or footer element not found in DOM');
+      console.error(
+        "Header or footer element not found in DOM (need #main-header/#main-footer or <header>/<footer>)"
+      );
       return;
     }
-    
-    renderWithTemplate(headerTemplate, headerElement);
-    renderWithTemplate(footerTemplate, footerElement);
-    
-    // Fix paths for root pages
+
+    renderWithTemplate(headerResult.tpl, headerElement);
+    renderWithTemplate(footerResult.tpl, footerElement);
+
     fixHeaderPaths();
   } catch (error) {
-    console.error('Error loading header/footer:', error);
-  }
-}
-
-// Fix header paths after loading based on current location
-function fixHeaderPaths() {
-  const currentPath = window.location.pathname;
-  const isRootPage = currentPath === '/' || 
-                     currentPath.endsWith('/index.html') || 
-                     currentPath.match(/\/[^\/]*\.html$/) === null ||
-                     (!currentPath.includes('/cart') && 
-                      !currentPath.includes('/product_pages') && 
-                      !currentPath.includes('/checkout'));
-  
-  if (isRootPage) {
-    // Fix logo link and image for root page
-    const logoLink = document.querySelector('.logo a');
-    const logoImg = document.querySelector('.logo img');
-    const cartLink = document.querySelector('.cart a');
-    
-    if (logoLink) logoLink.href = './index.html';
-    if (logoImg) logoImg.src = './images/noun_Tent_2517.svg';
-    if (cartLink) cartLink.href = './cart/index.html';
+    console.error("Error loading header/footer:", error);
   }
 }
