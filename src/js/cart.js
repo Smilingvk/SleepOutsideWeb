@@ -81,9 +81,14 @@ function renderCartTotal(cartItems) {
     <p style="font-size: 1.1em; margin-bottom: 0.5rem;">
       <strong>Items in Cart:</strong> ${itemCount}
     </p>
-    <p style="font-size: 1.3em; color: var(--tertiary-color); font-weight: bold;">
+    <p style="font-size: 1.3em; color: var(--tertiary-color); font-weight: bold; margin-bottom: 1rem;">
       <strong>Total:</strong> $${total.toFixed(2)}
     </p>
+    <a href="../checkout/index.html" style="display: inline-block; margin-top: 1rem;">
+      <button style="padding: 1rem 3rem; font-size: 1.1em; cursor: pointer;">
+        Proceed to Checkout
+      </button>
+    </a>
   `;
   
   cartFooter.style.display = 'block';

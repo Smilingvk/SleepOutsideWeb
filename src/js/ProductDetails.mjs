@@ -22,8 +22,10 @@ export default class ProductDetails {
     cartItems.push(this.product);
     setLocalStorage("so-cart", cartItems);
     
-    // Update cart count badge
-    updateCartCount();
+    // Update cart count badge (if you have implemented this)
+    if (typeof updateCartCount === 'function') {
+      updateCartCount();
+    }
     
     // Optional: Show feedback to user
     const button = document.getElementById("addToCart");
