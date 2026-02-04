@@ -76,9 +76,7 @@ export async function loadHeaderFooter() {
       "../public/partials/header.html",
       base + "partials/header.html",
       base + "public/partials/header.html",
-      // probar la ruta que usaste en GH Pages (source dentro de repo)
       base + "src/partials/header.html",
-      // fallback absoluto sobre origin + pathname (intento más agresivo)
       `${location.origin}${location.pathname.replace(/\/[^/]*$/, "/")}src/partials/header.html`,
       `${location.origin}${location.pathname.replace(/\/[^/]*$/, "/")}partials/header.html`,
     ];
@@ -119,7 +117,27 @@ export async function loadHeaderFooter() {
     renderWithTemplate(footerResult.tpl, footerElement);
 
     fixHeaderPaths();
+    
+    // Initialize search functionality after header is loaded
+    initializeSearchAfterDelay();
   } catch (error) {
     console.error("Error loading header/footer:", error);
   }
+}
+
+function fixHeaderPaths() {
+  // This function would handle any path fixing needed
+  // Add implementation if needed
+}
+
+function initializeSearchAfterDelay() {
+  // Wait a bit for the DOM to be fully ready
+  setTimeout(async () => {
+    try {
+      const { initializeSearch } = await import('./search.js');
+      initializeSearch();
+    } catch (error) {
+      console.warn("Search module not loaded:", error);
+    }
+  }, 100);
 }
