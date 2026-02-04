@@ -6,6 +6,41 @@
     <title>Sleep Outside | Home</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/main.js" type="module"></script>
+    <style>
+      .categories {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+        padding: 2rem 1rem;
+      }
+      
+      .category-card {
+        flex: 1 1 200px;
+        max-width: 250px;
+        text-align: center;
+        text-decoration: none;
+        color: var(--dark-grey);
+        transition: transform 0.2s;
+      }
+      
+      .category-card:hover {
+        transform: scale(1.05);
+      }
+      
+      .category-card img {
+        width: 100%;
+        max-width: 150px;
+        height: auto;
+        margin: 0 auto;
+      }
+      
+      .category-card h3 {
+        margin-top: 1rem;
+        font-size: 1.2em;
+        color: var(--secondary-color);
+      }
+    </style>
   </head>
 
   <body>
@@ -29,54 +64,26 @@
         </div>
       </div>
 
-      <section class="products">
-        <h2>Top Products</h2>
-        <ul class="product-list">
-          <li class="product-card">
-            <a href="product_pages/marmot-ajax-3.html">
-              <img
-                src="images/tents/marmot-ajax-tent-3-person-3-season-in-pale-pumpkin-terracotta~p~880rr_01~320.jpg"
-                alt="Marmot Ajax tent"
-              />
-              <h3 class="card__brand">Marmot</h3>
-              <h2 class="card__name">Ajax Tent - 3-Person, 3-Season</h2>
-              <p class="product-card__price">$199.99</p>
-            </a>
-          </li>
-          <li class="product-card">
-            <a href="product_pages/northface-talus-4.html">
-              <img
-                src="images/tents/the-north-face-talus-tent-4-person-3-season-in-golden-oak-saffron-yellow~p~985rf_01~320.jpg"
-                alt="Talus Tent - 4-Person, 3-Season"
-              />
-              <h3 class="card__brand">The North Face</h3>
-              <h2 class="card__name">Talus Tent - 4-Person, 3-Season</h2>
-              <p class="product-card__price">$199.99</p>
-            </a>
-          </li>
-          <li class="product-card">
-            <a href="product_pages/northface-alpine-3.html">
-              <img
-                src="images/tents/the-north-face-alpine-guide-tent-3-person-4-season-in-canary-yellow-high-rise-grey~p~985pr_01~320.jpg"
-                alt="Alpine Guide Tent - 3-Person, 4-Season"
-              />
-              <h3 class="card__brand">The North Face</h3>
-              <h2 class="card__name">Alpine Guide Tent - 3-Person, 4-Season</h2>
-              <p class="product-card__price">$349.99</p>
-            </a>
-          </li>
-          <li class="product-card">
-            <a href="product_pages/cedar-ridge-rimrock-2.html">
-              <img
-                src="images/tents/cedar-ridge-rimrock-tent-2-person-3-season-in-rust-clay~p~344yj_01~320.jpg"
-                alt="Rimrock Tent - 2-Person, 3-Season"
-              />
-              <h3 class="card__brand">Cedar Ridge</h3>
-              <h2 class="card__name">Rimrock Tent - 2-Person, 3-Season</h2>
-              <p class="product-card__price">$69.99</p>
-            </a>
-          </li>
-        </ul>
+      <section class="categories">
+        <a href="product_listing/index.html?category=tents" class="category-card">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23525b0f' d='M50 10L10 90h80L50 10zm0 20l25 50H25l25-50z'/%3E%3C/svg%3E" alt="Tents">
+          <h3>Tents</h3>
+        </a>
+        
+        <a href="product_listing/index.html?category=backpacks" class="category-card">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23525b0f' d='M35 20h30v10H35zm-5 10h40v50H30zm10 10h20v30H40z'/%3E%3C/svg%3E" alt="Backpacks">
+          <h3>Backpacks</h3>
+        </a>
+        
+        <a href="product_listing/index.html?category=sleeping-bags" class="category-card">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23525b0f' d='M20 30h60v40H20zm5 5v30h50V35z'/%3E%3C/svg%3E" alt="Sleeping Bags">
+          <h3>Sleeping Bags</h3>
+        </a>
+        
+        <a href="product_listing/index.html?category=hammocks" class="category-card">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%23525b0f' d='M10 30L20 20v10h60V20l10 10-10 10V30H20v10z M20 40Q20 60 50 60T80 40'/%3E%3C/svg%3E" alt="Hammocks">
+          <h3>Hammocks</h3>
+        </a>
       </section>
     </main>
     <footer id="main-footer"></footer>
