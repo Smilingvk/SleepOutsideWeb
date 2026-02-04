@@ -44,3 +44,39 @@
     </svg>
   </a>
 </div>
+
+<!-- INLINE SEARCH SCRIPT - Garantiza que funcione -->
+<script>
+  // Esperar a que el DOM esté listo
+  setTimeout(() => {
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
+    
+    if (searchForm && searchInput) {
+      searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const query = searchInput.value.trim();
+        
+        if (query.length > 0) {
+          // Determinar la ruta correcta basada en la ubicación actual
+          const currentPath = window.location.pathname;
+          let redirectUrl = "";
+          
+          if (currentPath.includes("index.html") || currentPath.endsWith("/") || currentPath.includes("src/")) {
+            redirectUrl = `product_listing/index.html?search=${encodeURIComponent(query)}`;
+          } else if (currentPath.includes("product_listing")) {
+            redirectUrl = `index.html?search=${encodeURIComponent(query)}`;
+          } else {
+            redirectUrl = `../product_listing/index.html?search=${encodeURIComponent(query)}`;
+          }
+          
+          console.log('🔍 Search:', query, '→', redirectUrl);
+          window.location.href = redirectUrl;
+        }
+      });
+      console.log('✅ Search initialized (inline)');
+    } else {
+      console.warn('⚠️ Search elements not found');
+    }
+  }, 100);
+</script>

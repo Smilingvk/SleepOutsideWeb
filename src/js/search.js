@@ -22,41 +22,53 @@ export async function searchProducts(query) {
 }
 
 export function initializeSearch() {
+  console.log("🔍 Initializing search...");
+  
   const searchForm = document.getElementById("search-form");
   const searchInput = document.getElementById("search-input");
 
+  console.log("Search form:", searchForm);
+  console.log("Search input:", searchInput);
+
   if (!searchForm || !searchInput) {
-    console.warn("Search form elements not found");
+    console.warn("⚠️ Search form elements not found");
     return;
   }
 
-  searchForm.addEventListener("submit", async (e) => {
+  searchForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    console.log("🔎 Search form submitted!");
     
     const query = searchInput.value.trim();
+    console.log("Search query:", query);
     
     if (query.length === 0) {
+      console.warn("Empty search query");
       return;
     }
 
-    // Store the search query in sessionStorage
-    sessionStorage.setItem("searchQuery", query);
-    
-    // Redirect to search results page
-    // Determine the correct path based on current location
+    // Get current path to determine redirect location
     const currentPath = window.location.pathname;
-    let searchPath = "";
+    console.log("Current path:", currentPath);
     
-    if (currentPath.includes("/product_pages/") || 
-        currentPath.includes("/cart/") || 
-        currentPath.includes("/checkout/")) {
-      searchPath = "../search/index.html";
-    } else if (currentPath.includes("/product_listing/")) {
-      searchPath = "../search/index.html";
-    } else {
-      searchPath = "search/index.html";
+    let redirectUrl = "";
+    
+    // If we're on the home page (index.html or root)
+    if (currentPath.includes("index.html") || currentPath.endsWith("/")) {
+      redirectUrl = `product_listing/index.html?search=${encodeURIComponent(query)}`;
+    } 
+    // If we're already in product_listing
+    else if (currentPath.includes("product_listing")) {
+      redirectUrl = `index.html?search=${encodeURIComponent(query)}`;
+    }
+    // If we're in other directories (cart, product_pages, etc)
+    else {
+      redirectUrl = `../product_listing/index.html?search=${encodeURIComponent(query)}`;
     }
     
-    window.location.href = searchPath;
+    console.log("Redirecting to:", redirectUrl);
+    window.location.href = redirectUrl;
   });
+  
+  console.log("✅ Search initialized successfully!");
 }

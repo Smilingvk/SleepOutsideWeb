@@ -25,12 +25,26 @@ export default class ProductList {
   }
 
   renderList(list) {
-    renderListWithTemplate(
-      productCardTemplate,
-      this.listElement,
-      list,
-      "afterbegin",
-      true
-    );
+    const noResultsDiv = document.getElementById('no-results');
+    
+    if (!list || list.length === 0) {
+      // Show no results message
+      this.listElement.innerHTML = '';
+      if (noResultsDiv) {
+        noResultsDiv.style.display = 'block';
+      }
+    } else {
+      // Hide no results and show products
+      if (noResultsDiv) {
+        noResultsDiv.style.display = 'none';
+      }
+      renderListWithTemplate(
+        productCardTemplate,
+        this.listElement,
+        list,
+        "afterbegin",
+        true
+      );
+    }
   }
 }

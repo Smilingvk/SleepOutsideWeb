@@ -66,7 +66,52 @@ export async function loadTemplate(path) {
   }
 }
 
+function fixHeaderPaths() {
+  // This function would handle any path fixing needed
+  console.log("Header paths fixed");
+}
+
+async function initializeSearchAfterDelay() {
+  // Wait for DOM to be ready
+  console.log("⏳ Waiting to initialize search...");
+  
+  // Try multiple times to ensure the header is loaded
+  let attempts = 0;
+  const maxAttempts = 10;
+  
+  const tryInitialize = async () => {
+    attempts++;
+    console.log(`Attempt ${attempts} to initialize search...`);
+    
+    const searchForm = document.getElementById("search-form");
+    
+    if (searchForm) {
+      console.log("✅ Search form found! Initializing...");
+      try {
+        const { initializeSearch } = await import('./search.js');
+        initializeSearch();
+        return true;
+      } catch (error) {
+        console.error("❌ Error importing search module:", error);
+        return false;
+      }
+    } else {
+      console.log("❌ Search form not found yet");
+      if (attempts < maxAttempts) {
+        setTimeout(tryInitialize, 200);
+      } else {
+        console.warn("⚠️ Max attempts reached. Search form may not be available.");
+      }
+      return false;
+    }
+  };
+  
+  setTimeout(tryInitialize, 100);
+}
+
 export async function loadHeaderFooter() {
+  console.log("📄 Loading header and footer...");
+  
   try {
     const base = import.meta?.env?.BASE_URL || "";
     const headerCandidates = [
@@ -89,7 +134,7 @@ export async function loadHeaderFooter() {
         try {
           console.debug("Trying template path:", p);
           const tpl = await loadTemplate(p);
-          console.debug("Loaded template from:", p);
+          console.debug("✅ Loaded template from:", p);
           return { tpl, path: p };
         } catch (e) {
           console.warn("Template not found at:", p);
@@ -116,28 +161,14 @@ export async function loadHeaderFooter() {
     renderWithTemplate(headerResult.tpl, headerElement);
     renderWithTemplate(footerResult.tpl, footerElement);
 
+    console.log("✅ Header and footer loaded!");
+    
     fixHeaderPaths();
     
     // Initialize search functionality after header is loaded
-    initializeSearchAfterDelay();
+    await initializeSearchAfterDelay();
+    
   } catch (error) {
-    console.error("Error loading header/footer:", error);
+    console.error("❌ Error loading header/footer:", error);
   }
-}
-
-function fixHeaderPaths() {
-  // This function would handle any path fixing needed
-  // Add implementation if needed
-}
-
-function initializeSearchAfterDelay() {
-  // Wait a bit for the DOM to be fully ready
-  setTimeout(async () => {
-    try {
-      const { initializeSearch } = await import('./search.js');
-      initializeSearch();
-    } catch (error) {
-      console.warn("Search module not loaded:", error);
-    }
-  }, 100);
 }
