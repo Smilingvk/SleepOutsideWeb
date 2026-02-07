@@ -1,56 +1,46 @@
-import { renderListWithTemplate } from "./utils.mjs";
+const baseURL = "https://wdd330-backend.onrender.com/";
 
-function productCardTemplate(product) {
-  // Detectar si estamos en product_listing o en raíz
-  const currentPath = window.location.pathname;
-  const productPagePath = currentPath.includes('product_listing') 
-    ? '../product_pages/?product=' 
-    : 'product_pages/?product=';
-  
-  return `<li class="product-card">
-    <a href="${productPagePath}${product.Id}">
-      <img src="${product.Image}" alt="Image of ${product.Name}">
-      <h2 class="card__brand">${product.Brand.Name}</h2>
-      <h3 class="card__name">${product.NameWithoutBrand}</h3>
-      <p class="product-card__price">$${product.FinalPrice}</p>
-    </a>
-  </li>`;
+function convertToJson(res) {
+  if (res.ok) {
+    return res.json();
+  } else {
+    throw new Error("Bad Response");
+  }
 }
 
-export default class ProductList {
-  constructor(category, dataSource, listElement) {
-    this.category = category;
-    this.dataSource = dataSource;
-    this.listElement = listElement;
-    this.products = [];
+export default class ExternalServices {
+  constructor() {
+    // Category is no longer needed in constructor
   }
 
-  async init() {
-    this.products = await this.dataSource.getData(this.category);
-    this.renderList(this.products);
+  async getData(category) {
+    const response = await fetch(`${baseURL}products/search/${category}`);
+    const data = await convertToJson(response);
+    return data.Result;
   }
 
-  renderList(list) {
-    const noResultsDiv = document.getElementById('no-results');
-    
-    if (!list || list.length === 0) {
-      // Show no results message
-      this.listElement.innerHTML = '';
-      if (noResultsDiv) {
-        noResultsDiv.style.display = 'block';
-      }
-    } else {
-      // Hide no results and show products
-      if (noResultsDiv) {
-        noResultsDiv.style.display = 'none';
-      }
-      renderListWithTemplate(
-        productCardTemplate,
-        this.listElement,
-        list,
-        "afterbegin",
-        true
-      );
+  async findProductById(id) {
+    const response = await fetch(`${baseURL}product/${id}`);
+    const data = await convertToJson(response);
+    return data.Result;
+  }
+
+  async checkout(order) {
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    };
+
+    try {
+      const response = await fetch(`${baseURL}checkout`, options);
+      const data = await convertToJson(response);
+      return data;
+    } catch (error) {
+      console.error("Error during checkout:", error);
+      throw error;
     }
   }
 }
