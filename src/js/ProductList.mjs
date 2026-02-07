@@ -1,56 +1,37 @@
-import { renderListWithTemplate } from "./utils.mjs";
+import ExternalServices from './ExternalServices.mjs';
+import ProductList from './ProductList.mjs';
+import { loadHeaderFooter, getParam } from './utils.mjs';
 
-function productCardTemplate(product) {
-  // Detectar si estamos en product_listing o en raíz
-  const currentPath = window.location.pathname;
-  const productPagePath = currentPath.includes('product_listing') 
-    ? '../product_pages/?product=' 
-    : 'product_pages/?product=';
-  
-  return `<li class="product-card">
-    <a href="${productPagePath}${product.Id}">
-      <img src="${product.Image}" alt="Image of ${product.Name}">
-      <h2 class="card__brand">${product.Brand.Name}</h2>
-      <h3 class="card__name">${product.NameWithoutBrand}</h3>
-      <p class="product-card__price">$${product.FinalPrice}</p>
-    </a>
-  </li>`;
-}
+console.log("🚀 product-listing.js cargado");
 
-export default class ProductList {
-  constructor(category, dataSource, listElement) {
-    this.category = category;
-    this.dataSource = dataSource;
-    this.listElement = listElement;
-    this.products = [];
-  }
+loadHeaderFooter();
 
-  async init() {
-    this.products = await this.dataSource.getData(this.category);
-    this.renderList(this.products);
-  }
+const category = getParam('category');
+const searchQuery = getParam('search');
 
-  renderList(list) {
-    const noResultsDiv = document.getElementById('no-results');
-    
-    if (!list || list.length === 0) {
-      // Show no results message
-      this.listElement.innerHTML = '';
-      if (noResultsDiv) {
-        noResultsDiv.style.display = 'block';
-      }
-    } else {
-      // Hide no results and show products
-      if (noResultsDiv) {
-        noResultsDiv.style.display = 'none';
-      }
-      renderListWithTemplate(
-        productCardTemplate,
-        this.listElement,
-        list,
-        "afterbegin",
-        true
-      );
-    }
-  }
+console.log("📦 Category:", category);
+console.log("🔍 Search:", searchQuery);
+
+const dataSource = new ExternalServices();
+const listElement = document.querySelector('.product-list');
+
+console.log("📋 List element:", listElement);
+
+const pageTitle = document.querySelector('.products h2');
+
+if (searchQuery) {
+  console.log("Modo: BÚSQUEDA");
+  pageTitle.textContent = `Search Results for "${searchQuery}"`;
+  const searchList = new ProductList(searchQuery, dataSource, listElement);
+  searchList.init();
+} else if (category) {
+  console.log("Modo: CATEGORÍA");
+  pageTitle.textContent = `${category.charAt(0).toUpperCase() + category.slice(1)}`;
+  const myList = new ProductList(category, dataSource, listElement);
+  myList.init();
+} else {
+  console.log("Modo: DEFAULT");
+  pageTitle.textContent = 'Products';
+  const myList = new ProductList('tents', dataSource, listElement);
+  myList.init();
 }

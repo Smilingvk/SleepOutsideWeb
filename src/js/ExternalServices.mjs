@@ -9,13 +9,11 @@ function convertToJson(res) {
 }
 
 export default class ExternalServices {
-  constructor() {
-    // Category is no longer needed in constructor
-  }
-
   async getData(category) {
+    console.log("🔍 Buscando productos para:", category);
     const response = await fetch(`${baseURL}products/search/${category}`);
     const data = await convertToJson(response);
+    console.log("✅ Productos encontrados:", data.Result.length);
     return data.Result;
   }
 
@@ -33,14 +31,8 @@ export default class ExternalServices {
       },
       body: JSON.stringify(order),
     };
-
-    try {
-      const response = await fetch(`${baseURL}checkout`, options);
-      const data = await convertToJson(response);
-      return data;
-    } catch (error) {
-      console.error("Error during checkout:", error);
-      throw error;
-    }
+    const response = await fetch(`${baseURL}checkout`, options);
+    const data = await convertToJson(response);
+    return data;
   }
 }
