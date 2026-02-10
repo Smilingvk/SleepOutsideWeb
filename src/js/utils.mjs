@@ -1,28 +1,17 @@
-// wrapper for querySelector...returns matching element
+// UTILS.MJS - VERSIÓN SIMPLE Y PROBADA
+
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
 }
 
-// retrieve data from localstorage
 export function getLocalStorage(key) {
   return JSON.parse(localStorage.getItem(key));
 }
 
-// save data to local storage
 export function setLocalStorage(key, data) {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
-// set a listener for both touchend and click
-export function setClick(selector, callback) {
-  qs(selector).addEventListener("touchend", (event) => {
-    event.preventDefault();
-    callback();
-  });
-  qs(selector).addEventListener("click", callback);
-}
-
-// get URL query parameter by name
 export function getParam(param) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -43,130 +32,59 @@ export function renderListWithTemplate(
   parentElement.insertAdjacentHTML(position, htmlStrings);
 }
 
-// New function for rendering a single template
-export function renderWithTemplate(template, parentElement, data, callback) {
+export function renderWithTemplate(template, parentElement) {
   parentElement.innerHTML = template;
-  if (callback) {
-    callback(data);
-  }
 }
 
-// Load template from a file
 export async function loadTemplate(path) {
-  try {
-    const res = await fetch(path);
-    if (!res.ok) {
-      throw new Error(`Failed to load template: ${path} (${res.status})`);
-    }
-    const template = await res.text();
-    return template;
-  } catch (error) {
-    console.error("Error loading template:", error);
-    throw error;
+  console.log("📄 Cargando template:", path);
+  const res = await fetch(path);
+  if (!res.ok) {
+    throw new Error(`Template not found: ${path}`);
   }
-}
-
-function fixHeaderPaths() {
-  // This function would handle any path fixing needed
-  console.log("Header paths fixed");
-}
-
-async function initializeSearchAfterDelay() {
-  // Wait for DOM to be ready
-  console.log("⏳ Waiting to initialize search...");
-  
-  // Try multiple times to ensure the header is loaded
-  let attempts = 0;
-  const maxAttempts = 10;
-  
-  const tryInitialize = async () => {
-    attempts++;
-    console.log(`Attempt ${attempts} to initialize search...`);
-    
-    const searchForm = document.getElementById("search-form");
-    
-    if (searchForm) {
-      console.log("✅ Search form found! Initializing...");
-      try {
-        const { initializeSearch } = await import('./search.js');
-        initializeSearch();
-        return true;
-      } catch (error) {
-        console.error("❌ Error importing search module:", error);
-        return false;
-      }
-    } else {
-      console.log("❌ Search form not found yet");
-      if (attempts < maxAttempts) {
-        setTimeout(tryInitialize, 200);
-      } else {
-        console.warn("⚠️ Max attempts reached. Search form may not be available.");
-      }
-      return false;
-    }
-  };
-  
-  setTimeout(tryInitialize, 100);
+  return await res.text();
 }
 
 export async function loadHeaderFooter() {
   console.log("📄 Loading header and footer...");
   
   try {
-    const base = import.meta?.env?.BASE_URL || "";
-    const headerCandidates = [
-      "./partials/header.html",
-      "../partials/header.html",
-      "./public/partials/header.html",
-      "../public/partials/header.html",
-      base + "partials/header.html",
-      base + "public/partials/header.html",
-      base + "src/partials/header.html",
-      `${location.origin}${location.pathname.replace(/\/[^/]*$/, "/")}src/partials/header.html`,
-      `${location.origin}${location.pathname.replace(/\/[^/]*$/, "/")}partials/header.html`,
-    ];
-    const footerCandidates = headerCandidates.map((p) =>
-      p.replace("header.html", "footer.html")
-    );
-
-    async function tryLoadAny(list) {
-      for (const p of list) {
-        try {
-          console.debug("Trying template path:", p);
-          const tpl = await loadTemplate(p);
-          console.debug("✅ Loaded template from:", p);
-          return { tpl, path: p };
-        } catch (e) {
-          console.warn("Template not found at:", p);
-        }
+    // Intentar cargar header
+    let headerTemplate;
+    try {
+      headerTemplate = await loadTemplate("../public/partials/header.html");
+    } catch {
+      try {
+        headerTemplate = await loadTemplate("public/partials/header.html");
+      } catch {
+        headerTemplate = await loadTemplate("partials/header.html");
       }
-      throw new Error("No candidate path succeeded");
     }
-
-    const headerResult = await tryLoadAny(headerCandidates);
-    const footerResult = await tryLoadAny(footerCandidates);
-
-    const headerElement =
-      document.querySelector("#main-header") || document.querySelector("header");
-    const footerElement =
-      document.querySelector("#main-footer") || document.querySelector("footer");
-
-    if (!headerElement || !footerElement) {
-      console.error(
-        "Header or footer element not found in DOM (need #main-header/#main-footer or <header>/<footer>)"
-      );
-      return;
+    
+    // Intentar cargar footer
+    let footerTemplate;
+    try {
+      footerTemplate = await loadTemplate("../public/partials/footer.html");
+    } catch {
+      try {
+        footerTemplate = await loadTemplate("public/partials/footer.html");
+      } catch {
+        footerTemplate = await loadTemplate("partials/footer.html");
+      }
     }
-
-    renderWithTemplate(headerResult.tpl, headerElement);
-    renderWithTemplate(footerResult.tpl, footerElement);
-
-    console.log("✅ Header and footer loaded!");
     
-    fixHeaderPaths();
+    const headerElement = document.querySelector("#main-header");
+    const footerElement = document.querySelector("#main-footer");
     
-    // Initialize search functionality after header is loaded
-    await initializeSearchAfterDelay();
+    if (headerElement) {
+      renderWithTemplate(headerTemplate, headerElement);
+      console.log("✅ Header loaded");
+    }
+    
+    if (footerElement) {
+      renderWithTemplate(footerTemplate, footerElement);
+      console.log("✅ Footer loaded");
+    }
     
   } catch (error) {
     console.error("❌ Error loading header/footer:", error);
