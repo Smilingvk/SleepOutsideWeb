@@ -1,13 +1,8 @@
 import { renderListWithTemplate } from "./utils.mjs";
 
 function productCardTemplate(product) {
-  const currentPath = window.location.pathname;
-  const productPagePath = currentPath.includes('product_listing') 
-    ? '../product_pages/?product=' 
-    : 'product_pages/?product=';
-  
   return `<li class="product-card">
-    <a href="${productPagePath}${product.Id}">
+    <a href="/product_pages/?product=${product.Id}">
       <img src="${product.Image}" alt="Image of ${product.Name}">
       <h2 class="card__brand">${product.Brand.Name}</h2>
       <h3 class="card__name">${product.NameWithoutBrand}</h3>

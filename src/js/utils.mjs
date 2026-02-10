@@ -1,4 +1,4 @@
-// UTILS.MJS - VERSIÓN SIMPLE Y PROBADA
+// UTILS.MJS - FIXED VERSION
 
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
@@ -37,7 +37,7 @@ export function renderWithTemplate(template, parentElement) {
 }
 
 export async function loadTemplate(path) {
-  console.log("📄 Cargando template:", path);
+  console.log("📄 Loading template:", path);
   const res = await fetch(path);
   if (!res.ok) {
     throw new Error(`Template not found: ${path}`);
@@ -49,29 +49,21 @@ export async function loadHeaderFooter() {
   console.log("📄 Loading header and footer...");
   
   try {
-    // Intentar cargar header
-    let headerTemplate;
-    try {
-      headerTemplate = await loadTemplate("../public/partials/header.html");
-    } catch {
-      try {
-        headerTemplate = await loadTemplate("public/partials/header.html");
-      } catch {
-        headerTemplate = await loadTemplate("partials/header.html");
-      }
+    // Determinar la ruta base según la ubicación actual
+    const currentPath = window.location.pathname;
+    let basePath = '';
+    
+    // Si estamos en un subdirectorio, necesitamos subir un nivel
+    if (currentPath.includes('/cart/') || 
+        currentPath.includes('/checkout/') || 
+        currentPath.includes('/product_pages/') || 
+        currentPath.includes('/product_listing/')) {
+      basePath = '../';
     }
     
-    // Intentar cargar footer
-    let footerTemplate;
-    try {
-      footerTemplate = await loadTemplate("../public/partials/footer.html");
-    } catch {
-      try {
-        footerTemplate = await loadTemplate("public/partials/footer.html");
-      } catch {
-        footerTemplate = await loadTemplate("partials/footer.html");
-      }
-    }
+    // Cargar templates
+    const headerTemplate = await loadTemplate(`${basePath}public/partials/header.html`);
+    const footerTemplate = await loadTemplate(`${basePath}public/partials/footer.html`);
     
     const headerElement = document.querySelector("#main-header");
     const footerElement = document.querySelector("#main-footer");
@@ -88,5 +80,30 @@ export async function loadHeaderFooter() {
     
   } catch (error) {
     console.error("❌ Error loading header/footer:", error);
+  }
+}
+
+export function updateCartCount() {
+  const cartItems = getLocalStorage("so-cart") || [];
+  const cartCount = cartItems.length;
+  
+  // Try to find or create the cart count badge
+  let badge = document.querySelector('.cart-count');
+  
+  if (cartCount > 0) {
+    if (!badge) {
+      const cartDiv = document.querySelector('.cart');
+      if (cartDiv) {
+        badge = document.createElement('span');
+        badge.className = 'cart-count';
+        cartDiv.appendChild(badge);
+      }
+    }
+    if (badge) {
+      badge.textContent = cartCount;
+      badge.style.display = 'flex';
+    }
+  } else if (badge) {
+    badge.style.display = 'none';
   }
 }
