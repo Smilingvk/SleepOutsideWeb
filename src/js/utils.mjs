@@ -1,4 +1,3 @@
-// UTILS.MJS - FIXED VERSION
 
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
@@ -37,7 +36,6 @@ export function renderWithTemplate(template, parentElement) {
 }
 
 export async function loadTemplate(path) {
-  console.log("📄 Loading template:", path);
   const res = await fetch(path);
   if (!res.ok) {
     throw new Error(`Template not found: ${path}`);
@@ -46,40 +44,36 @@ export async function loadTemplate(path) {
 }
 
 export async function loadHeaderFooter() {
-  console.log("📄 Loading header and footer...");
-  
   try {
-    // Determinar la ruta base según la ubicación actual
-    const currentPath = window.location.pathname;
-    let basePath = '';
+    // Determinar ruta base
+    const path = window.location.pathname;
+    let base = '';
     
-    // Si estamos en un subdirectorio, necesitamos subir un nivel
-    if (currentPath.includes('/cart/') || 
-        currentPath.includes('/checkout/') || 
-        currentPath.includes('/product_pages/') || 
-        currentPath.includes('/product_listing/')) {
-      basePath = '../';
+    // Si NO estamos en la raíz, subir un nivel
+    if (!path.endsWith('/') && !path.includes('index.html') || 
+        path.includes('/cart/') || 
+        path.includes('/checkout/') || 
+        path.includes('/product_pages/') || 
+        path.includes('/product_listing/')) {
+      base = '../';
     }
     
-    // Cargar templates
-    const headerTemplate = await loadTemplate(`${basePath}public/partials/header.html`);
-    const footerTemplate = await loadTemplate(`${basePath}public/partials/footer.html`);
+    const headerTemplate = await loadTemplate(base + 'public/partials/header.html');
+    const footerTemplate = await loadTemplate(base + 'public/partials/footer.html');
     
     const headerElement = document.querySelector("#main-header");
     const footerElement = document.querySelector("#main-footer");
     
     if (headerElement) {
       renderWithTemplate(headerTemplate, headerElement);
-      console.log("✅ Header loaded");
     }
     
     if (footerElement) {
       renderWithTemplate(footerTemplate, footerElement);
-      console.log("✅ Footer loaded");
     }
     
   } catch (error) {
-    console.error("❌ Error loading header/footer:", error);
+    console.error("Error loading header/footer:", error);
   }
 }
 
@@ -87,7 +81,6 @@ export function updateCartCount() {
   const cartItems = getLocalStorage("so-cart") || [];
   const cartCount = cartItems.length;
   
-  // Try to find or create the cart count badge
   let badge = document.querySelector('.cart-count');
   
   if (cartCount > 0) {
