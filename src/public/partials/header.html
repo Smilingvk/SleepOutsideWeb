@@ -44,32 +44,3 @@
     </svg>
   </a>
 </div>
-
-<script>
-  setTimeout(() => {
-    const searchForm = document.getElementById('search-form');
-    const searchInput = document.getElementById('search-input');
-    
-    if (searchForm && searchInput) {
-      searchForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const query = searchInput.value.trim();
-        
-        if (query.length > 0) {
-          const currentPath = window.location.pathname;
-          let redirectUrl = "";
-          
-          if (currentPath.includes("index.html") || currentPath.endsWith("/")) {
-            redirectUrl = `product_listing/index.html?search=${encodeURIComponent(query)}`;
-          } else if (currentPath.includes("product_listing")) {
-            redirectUrl = `index.html?search=${encodeURIComponent(query)}`;
-          } else {
-            redirectUrl = `../product_listing/index.html?search=${encodeURIComponent(query)}`;
-          }
-          
-          window.location.href = redirectUrl;
-        }
-      });
-    }
-  }, 100);
-</script>

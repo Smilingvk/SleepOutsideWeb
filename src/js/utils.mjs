@@ -65,6 +65,8 @@ export async function loadHeaderFooter() {
     
     if (headerElement) {
       renderWithTemplate(headerTemplate, headerElement);
+      // Inicializar funcionalidades del header después de cargarlo
+      initializeHeaderFeatures();
     }
     
     if (footerElement) {
@@ -73,6 +75,38 @@ export async function loadHeaderFooter() {
     
   } catch (error) {
     console.error("Error loading header/footer:", error);
+  }
+}
+
+function initializeHeaderFeatures() {
+  // Actualizar contador del carrito
+  updateCartCount();
+  
+  // Inicializar búsqueda
+  const searchForm = document.getElementById('search-form');
+  const searchInput = document.getElementById('search-input');
+  
+  if (searchForm && searchInput) {
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const query = searchInput.value.trim();
+      
+      if (query.length > 0) {
+        const currentPath = window.location.pathname;
+        let redirectUrl = "";
+        
+        // Detectar la ubicación actual y redirigir apropiadamente
+        if (currentPath.includes("index.html") || currentPath.endsWith("/") || !currentPath.includes("/")) {
+          redirectUrl = `product_listing/index.html?search=${encodeURIComponent(query)}`;
+        } else if (currentPath.includes("product_listing")) {
+          redirectUrl = `index.html?search=${encodeURIComponent(query)}`;
+        } else {
+          redirectUrl = `../product_listing/index.html?search=${encodeURIComponent(query)}`;
+        }
+        
+        window.location.href = redirectUrl;
+      }
+    });
   }
 }
 

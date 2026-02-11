@@ -1,8 +1,23 @@
 import { renderListWithTemplate } from "./utils.mjs";
 
 function productCardTemplate(product) {
+  // Obtener el path base correcto
+  const currentPath = window.location.pathname;
+  let productPath = '';
+  
+  if (currentPath.includes('/product_listing/')) {
+    productPath = '../product_pages/?product=';
+  } else if (currentPath.includes('/cart/') || 
+             currentPath.includes('/checkout/') || 
+             currentPath.includes('/product_pages/')) {
+    productPath = '../product_pages/?product=';
+  } else {
+    // Estamos en la raíz o index.html
+    productPath = 'product_pages/?product=';
+  }
+  
   return `<li class="product-card">
-    <a href="/product_pages/?product=${product.Id}">
+    <a href="${productPath}${product.Id}">
       <img src="${product.Image}" alt="Image of ${product.Name}">
       <h2 class="card__brand">${product.Brand.Name}</h2>
       <h3 class="card__name">${product.NameWithoutBrand}</h3>
