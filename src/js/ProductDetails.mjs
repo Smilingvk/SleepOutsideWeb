@@ -1,6 +1,21 @@
 import { getLocalStorage, setLocalStorage, updateCartCount } from "./utils.mjs";
 import { loadHeaderFooter } from './utils.mjs';
+
 loadHeaderFooter();
+
+function productDetailsTemplate(product) {
+  return `
+    <h2>${product.Brand.Name}</h2>
+    <h3 class="divider">${product.NameWithoutBrand}</h3>
+    <img src="${product.Images.PrimaryLarge}" alt="${product.NameWithoutBrand}" id="productImage" class="divider" />
+    <p id="productPrice" class="product-card__price">$${product.FinalPrice}</p>
+    <p id="productColor" class="product__color">${product.Colors?.[0]?.ColorName || "N/A"}</p>
+    <div id="productDesc" class="product__description">${product.DescriptionHtmlSimple}</div>
+    <div class="product-detail__add">
+      <button id="addToCart" data-id="${product.Id}">Add to Cart</button>
+    </div>
+  `;
+}
 
 export default class ProductDetails {
   constructor(productId, dataSource) {
@@ -22,12 +37,12 @@ export default class ProductDetails {
     cartItems.push(this.product);
     setLocalStorage("so-cart", cartItems);
     
-    // Update cart count badge (if you have implemented this)
+    // Update cart count badge
     if (typeof updateCartCount === 'function') {
       updateCartCount();
     }
     
-    // Optional: Show feedback to user
+    // Show feedback to user
     const button = document.getElementById("addToCart");
     const originalText = button.textContent;
     button.textContent = "Added!";
@@ -40,23 +55,9 @@ export default class ProductDetails {
   }
 
   renderProductDetails() {
-    productDetailsTemplate(this.product);
+    const detailSection = document.querySelector(".product-detail");
+    if (detailSection) {
+      detailSection.innerHTML = productDetailsTemplate(this.product);
+    }
   }
-}
-
-function productDetailsTemplate(product) {
-  document.querySelector("h2").textContent = product.Brand.Name;
-  document.querySelector("h3").textContent = product.NameWithoutBrand;
-
-  const productImage = document.getElementById("productImage");
-  productImage.src = product.Image;
-  productImage.alt = product.NameWithoutBrand;
-
-  document.getElementById("productPrice").textContent = `$${product.FinalPrice}`;
-  document.getElementById("productColor").textContent =
-    product.Colors?.[0]?.ColorName || "N/A";
-  document.getElementById("productDesc").innerHTML =
-    product.DescriptionHtmlSimple;
-
-  document.getElementById("addToCart").dataset.id = product.Id;
 }
