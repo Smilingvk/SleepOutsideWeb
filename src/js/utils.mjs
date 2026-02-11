@@ -1,3 +1,4 @@
+// UTILS.MJS - GITHUB PAGES VERSION
 
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
@@ -45,13 +46,11 @@ export async function loadTemplate(path) {
 
 export async function loadHeaderFooter() {
   try {
-    // Determinar ruta base
     const path = window.location.pathname;
     let base = '';
     
-    // Si NO estamos en la raíz, subir un nivel
-    if (!path.endsWith('/') && !path.includes('index.html') || 
-        path.includes('/cart/') || 
+    // Para GitHub Pages - detectar si estamos en subdirectorio
+    if (path.includes('/cart/') || 
         path.includes('/checkout/') || 
         path.includes('/product_pages/') || 
         path.includes('/product_listing/')) {
