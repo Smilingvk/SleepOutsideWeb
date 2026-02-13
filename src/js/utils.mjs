@@ -1,3 +1,5 @@
+// UTILS.MJS - GITHUB PAGES VERSION
+
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
 }
@@ -65,6 +67,8 @@ export async function loadHeaderFooter() {
       renderWithTemplate(headerTemplate, headerElement);
       // Inicializar funcionalidades del header después de cargarlo
       initializeHeaderFeatures();
+      // Fix header links después de cargar
+      fixHeaderLinks();
     }
     
     if (footerElement) {
@@ -73,6 +77,54 @@ export async function loadHeaderFooter() {
     
   } catch (error) {
     console.error("Error loading header/footer:", error);
+  }
+}
+
+function fixHeaderLinks() {
+  const currentPath = window.location.pathname;
+  
+  // Fix logo link
+  const logoLink = document.querySelector('.logo a');
+  if (logoLink) {
+    if (currentPath.includes('/cart/') || 
+        currentPath.includes('/checkout/') || 
+        currentPath.includes('/product_pages/') || 
+        currentPath.includes('/product_listing/')) {
+      logoLink.href = '../index.html';
+    } else {
+      logoLink.href = 'index.html';
+    }
+  }
+  
+  // Fix logo image
+  const logoImg = document.querySelector('.logo img');
+  if (logoImg) {
+    if (currentPath.includes('/cart/') || 
+        currentPath.includes('/checkout/') || 
+        currentPath.includes('/product_pages/') || 
+        currentPath.includes('/product_listing/')) {
+      logoImg.src = '../images/noun_Tent_2517.svg';
+    } else {
+      logoImg.src = 'images/noun_Tent_2517.svg';
+    }
+  }
+  
+  // Fix cart link (esto lo hace el script en header.html, pero por si acaso)
+  const cartLink = document.getElementById('cart-link');
+  if (cartLink && !cartLink.href.includes('index.html')) {
+    let cartUrl = '';
+    
+    if (currentPath.includes('/cart/')) {
+      cartUrl = 'index.html';
+    } else if (currentPath.includes('/checkout/') || 
+               currentPath.includes('/product_pages/') || 
+               currentPath.includes('/product_listing/')) {
+      cartUrl = '../cart/index.html';
+    } else {
+      cartUrl = 'cart/index.html';
+    }
+    
+    cartLink.href = cartUrl;
   }
 }
 
