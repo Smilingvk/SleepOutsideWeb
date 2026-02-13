@@ -24,11 +24,18 @@ if (zipInput) {
 
 // Handle form submission
 const checkoutForm = document.getElementById("checkout-form");
-const alertDiv = document.getElementById("checkout-alert");
 
 if (checkoutForm) {
   checkoutForm.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    // Validate the form
+    const chk_status = checkoutForm.checkValidity();
+    checkoutForm.reportValidity();
+    
+    if (!chk_status) {
+      return; // Stop if form is invalid
+    }
 
     // Show loading state
     const submitButton = checkoutForm.querySelector('button[type="submit"]');
@@ -36,35 +43,18 @@ if (checkoutForm) {
     submitButton.textContent = "Processing...";
     submitButton.disabled = true;
 
-    // Hide any previous alerts
-    alertDiv.classList.remove("show", "success", "error");
-
     try {
       // Submit the order
       const response = await checkout.checkout(checkoutForm);
 
       console.log("Checkout successful:", response);
 
-      // Show success message
-      alertDiv.textContent = "Order placed successfully! Thank you for your purchase.";
-      alertDiv.classList.add("alert", "success", "show");
-
-      // Clear the form
-      checkoutForm.reset();
-
-      // Redirect to home page after 3 seconds
-      setTimeout(() => {
-        window.location.href = "../index.html";
-      }, 3000);
+      // Redirect to success page
+      window.location.href = "success.html";
     } catch (error) {
       console.error("Checkout failed:", error);
 
-      // Show error message
-      alertDiv.textContent =
-        "There was an error processing your order. Please try again.";
-      alertDiv.classList.add("alert", "error", "show");
-
-      // Re-enable button
+      // Re-enable button (error message already shown by CheckoutProcess)
       submitButton.textContent = originalButtonText;
       submitButton.disabled = false;
     }

@@ -1,5 +1,3 @@
-// UTILS.MJS - GITHUB PAGES VERSION
-
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
 }
@@ -49,17 +47,12 @@ export async function loadHeaderFooter() {
     const path = window.location.pathname;
     let base = '';
     
-    console.log('🔍 Current path:', path);
-    
     // Para GitHub Pages - detectar si estamos en subdirectorio
     if (path.includes('/cart/') || 
         path.includes('/checkout/') || 
         path.includes('/product_pages/') || 
         path.includes('/product_listing/')) {
       base = '../';
-      console.log('📁 In subdirectory, base:', base);
-    } else {
-      console.log('📁 In root directory');
     }
     
     const headerTemplate = await loadTemplate(base + 'public/partials/header.html');
@@ -70,71 +63,24 @@ export async function loadHeaderFooter() {
     
     if (headerElement) {
       renderWithTemplate(headerTemplate, headerElement);
-      console.log('✅ Header loaded');
       // Inicializar funcionalidades del header después de cargarlo
-      initializeHeaderFeatures(base);
+      initializeHeaderFeatures();
     }
     
     if (footerElement) {
       renderWithTemplate(footerTemplate, footerElement);
-      console.log('✅ Footer loaded');
     }
     
   } catch (error) {
-    console.error("❌ Error loading header/footer:", error);
+    console.error("Error loading header/footer:", error);
   }
 }
 
-function initializeHeaderFeatures(base = '') {
-  console.log('🚀 Initializing header features with base:', base || '(root)');
-  
-  // Configurar rutas dinámicas del header
-  setupHeaderLinks(base);
-  
+function initializeHeaderFeatures() {
   // Actualizar contador del carrito
   updateCartCount();
   
   // Inicializar búsqueda
-  setupSearch(base);
-}
-
-function setupHeaderLinks(base) {
-  console.log('🔗 Setting up header links...');
-  
-  // Configurar link del carrito
-  const cartLink = document.querySelector('.cart a');
-  if (cartLink) {
-    const cartUrl = base + 'cart/index.html';
-    cartLink.href = cartUrl;
-    console.log('🛒 Cart link set to:', cartUrl);
-  } else {
-    console.warn('⚠️ Cart link not found');
-  }
-  
-  // Configurar link del logo (home)
-  const homeLink = document.querySelector('.logo a');
-  if (homeLink) {
-    const homeUrl = base + 'index.html';
-    homeLink.href = homeUrl;
-    console.log('🏠 Home link set to:', homeUrl);
-  } else {
-    console.warn('⚠️ Home link not found');
-  }
-  
-  // Configurar imagen del logo
-  const logoImg = document.querySelector('.logo img');
-  if (logoImg) {
-    const logoUrl = base + 'images/noun_Tent_2517.svg';
-    logoImg.src = logoUrl;
-    console.log('🖼️ Logo image set to:', logoUrl);
-  } else {
-    console.warn('⚠️ Logo image not found');
-  }
-}
-
-function setupSearch(base) {
-  console.log('🔎 Setting up search...');
-  
   const searchForm = document.getElementById('search-form');
   const searchInput = document.getElementById('search-input');
   
@@ -143,33 +89,28 @@ function setupSearch(base) {
       e.preventDefault();
       const query = searchInput.value.trim();
       
-      console.log('🔍 Search submitted:', query);
-      
       if (query.length > 0) {
+        const currentPath = window.location.pathname;
         let redirectUrl = "";
         
-        // Si ya tenemos base (estamos en subdirectorio), ajustar
-        if (base) {
-          redirectUrl = `${base}product_listing/index.html?search=${encodeURIComponent(query)}`;
-        } else {
+        // Detectar la ubicación actual y redirigir apropiadamente
+        if (currentPath.includes("index.html") || currentPath.endsWith("/") || !currentPath.includes("/")) {
           redirectUrl = `product_listing/index.html?search=${encodeURIComponent(query)}`;
+        } else if (currentPath.includes("product_listing")) {
+          redirectUrl = `index.html?search=${encodeURIComponent(query)}`;
+        } else {
+          redirectUrl = `../product_listing/index.html?search=${encodeURIComponent(query)}`;
         }
         
-        console.log('➡️ Redirecting to:', redirectUrl);
         window.location.href = redirectUrl;
       }
     });
-    console.log('✅ Search initialized');
-  } else {
-    console.warn('⚠️ Search form not found');
   }
 }
 
 export function updateCartCount() {
   const cartItems = getLocalStorage("so-cart") || [];
   const cartCount = cartItems.length;
-  
-  console.log('🛒 Updating cart count:', cartCount);
   
   let badge = document.querySelector('.cart-count');
   
@@ -189,4 +130,34 @@ export function updateCartCount() {
   } else if (badge) {
     badge.style.display = 'none';
   }
+}
+
+export function alertMessage(message, scroll = true) {
+  // Create element to hold the alert
+  const alert = document.createElement('div');
+  alert.classList.add('alert');
+  
+  // Set the contents with message and close button
+  alert.innerHTML = `<p>${message}</p><span class="close-alert">X</span>`;
+  
+  // Add a listener to the alert to see if they clicked on the X
+  alert.addEventListener('click', function(e) {
+    if (e.target.classList.contains('close-alert')) {
+      this.remove();
+    }
+  });
+  
+  // Add the alert to the top of main
+  const main = document.querySelector('main');
+  main.prepend(alert);
+  
+  // Make sure they see the alert by scrolling to the top of the window
+  if (scroll) {
+    window.scrollTo(0, 0);
+  }
+}
+
+export function removeAllAlerts() {
+  const alerts = document.querySelectorAll('.alert');
+  alerts.forEach(alert => alert.remove());
 }

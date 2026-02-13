@@ -1,4 +1,4 @@
-import { getLocalStorage, setLocalStorage } from "./utils.mjs";
+import { getLocalStorage, setLocalStorage, alertMessage, removeAllAlerts } from "./utils.mjs";
 import ExternalServices from "./ExternalServices.mjs";
 
 // takes a form element and returns an object where the key is the "name" of the form input.
@@ -111,36 +111,39 @@ export default class CheckoutProcess {
   }
 
   async checkout(form) {
-    // Get form data and convert to JSON
-    const formData = formDataToJSON(form);
-
-    // Get current date in ISO format
-    const orderDate = new Date().toISOString();
-
-    // Package items for checkout
-    const items = packageItems(this.list);
-
-    // Create the order object in the format expected by the server
-    const order = {
-      orderDate: orderDate,
-      fname: formData.fname,
-      lname: formData.lname,
-      street: formData.street,
-      city: formData.city,
-      state: formData.state,
-      zip: formData.zip,
-      cardNumber: formData.cardNumber,
-      expiration: formData.expiration,
-      code: formData.code,
-      items: items,
-      orderTotal: this.orderTotal.toFixed(2),
-      shipping: this.shipping,
-      tax: this.tax.toFixed(2),
-    };
-
-    console.log("Order to submit:", order);
-
     try {
+      // Remove any previous alerts
+      removeAllAlerts();
+
+      // Get form data and convert to JSON
+      const formData = formDataToJSON(form);
+
+      // Get current date in ISO format
+      const orderDate = new Date().toISOString();
+
+      // Package items for checkout
+      const items = packageItems(this.list);
+
+      // Create the order object in the format expected by the server
+      const order = {
+        orderDate: orderDate,
+        fname: formData.fname,
+        lname: formData.lname,
+        street: formData.street,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip,
+        cardNumber: formData.cardNumber,
+        expiration: formData.expiration,
+        code: formData.code,
+        items: items,
+        orderTotal: this.orderTotal.toFixed(2),
+        shipping: this.shipping,
+        tax: this.tax.toFixed(2),
+      };
+
+      console.log("Order to submit:", order);
+
       // Create ExternalServices instance and submit the order
       const services = new ExternalServices();
       const response = await services.checkout(order);
@@ -153,6 +156,28 @@ export default class CheckoutProcess {
       return response;
     } catch (error) {
       console.error("Checkout error:", error);
+      
+      // Display error messages to the user
+      if (error.name === 'servicesError' && error.message) {
+        // The server sent back specific error messages
+        let errorMessages = '';
+        
+        // Check if the error message has an array of errors
+        if (Array.isArray(error.message)) {
+          errorMessages = error.message.map(err => err.message).join('<br>');
+        } else if (typeof error.message === 'object') {
+          // Handle object with error details
+          errorMessages = Object.values(error.message).join('<br>');
+        } else {
+          errorMessages = error.message;
+        }
+        
+        alertMessage(errorMessages, true);
+      } else {
+        // Generic error message
+        alertMessage("There was an error processing your order. Please try again.", true);
+      }
+      
       throw error;
     }
   }

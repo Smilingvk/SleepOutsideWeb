@@ -1,4 +1,4 @@
-import { getLocalStorage, setLocalStorage, updateCartCount } from "./utils.mjs";
+import { getLocalStorage, setLocalStorage, updateCartCount, alertMessage } from "./utils.mjs";
 import { loadHeaderFooter } from './utils.mjs';
 
 loadHeaderFooter();
@@ -42,7 +42,10 @@ export default class ProductDetails {
       updateCartCount();
     }
     
-    // Show feedback to user
+    // Show success alert
+    alertMessage(`${this.product.Name} has been added to your cart!`, false);
+    
+    // Optional: Still change button text temporarily
     const button = document.getElementById("addToCart");
     const originalText = button.textContent;
     button.textContent = "Added!";

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sleep Outside | Order Success</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+      .success-container {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .success-icon {
+        font-size: 4rem;
+        color: #4CAF50;
+        margin-bottom: 1rem;
+      }
+
+      .success-container h1 {
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+      }
+
+      .success-container p {
+        font-size: 1.1em;
+        margin-bottom: 2rem;
+        color: var(--dark-grey);
+      }
+
+      .success-container .button-group {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .success-container button,
+      .success-container a {
+        padding: 1rem 2rem;
+        font-size: 1em;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .success-container a {
+        background-color: var(--light-grey);
+        color: var(--dark-grey);
+        border: 2px solid var(--dark-grey);
+      }
+
+      .success-container a:hover {
+        background-color: var(--dark-grey);
+        color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="divider" id="main-header"></header>
+
+    <main class="divider">
+      <div class="success-container">
+        <div class="success-icon">✓</div>
+        <h1>Order Successful!</h1>
+        <p>
+          Thank you for your purchase! Your order has been received and is being processed.
+        </p>
+        <p>
+          You will receive a confirmation email shortly with your order details.
+        </p>
+        <div class="button-group">
+          <a href="../index.html">Continue Shopping</a>
+          <a href="../product_listing/index.html?category=tents">Browse Tents</a>
+        </div>
+      </div>
+    </main>
+
+    <footer id="main-footer"></footer>
+    <script type="module">
+      import { loadHeaderFooter } from '../js/utils.mjs';
+      loadHeaderFooter();
+    </script>
+  </body>
+</html>
