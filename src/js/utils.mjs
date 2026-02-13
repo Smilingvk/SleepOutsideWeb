@@ -1,4 +1,4 @@
-// UTILS.MJS - GITHUB PAGES VERSION
+// UTILS.MJS - GITHUB PAGES VERSION CON ANIMACIÓN DEL CARRITO
 
 export function qs(selector, parent = document) {
   return parent.querySelector(selector);
@@ -160,7 +160,62 @@ function initializeHeaderFeatures() {
   }
 }
 
-export function updateCartCount() {
+/**
+ * Anima el ícono del carrito cuando se agrega un producto
+ * @param {string} animationType - Tipo de animación: 'bounce', 'shake', 'bounce-shake', 'flash'
+ */
+export function animateCart(animationType = 'bounce-shake') {
+  const cartElement = document.querySelector('.cart');
+  const cartBadge = document.querySelector('.cart-count');
+  
+  if (!cartElement) return;
+  
+  // Remover cualquier animación anterior
+  cartElement.classList.remove('animate-bounce', 'animate-shake', 'animate-bounce-shake', 'flash');
+  
+  // Forzar reflow para que la animación se pueda repetir
+  void cartElement.offsetWidth;
+  
+  // Agregar la clase de animación
+  switch(animationType) {
+    case 'bounce':
+      cartElement.classList.add('animate-bounce');
+      break;
+    case 'shake':
+      cartElement.classList.add('animate-shake');
+      break;
+    case 'flash':
+      cartElement.classList.add('flash');
+      break;
+    case 'bounce-shake':
+    default:
+      cartElement.classList.add('animate-bounce-shake');
+      break;
+  }
+  
+  // Animar el badge si existe
+  if (cartBadge) {
+    cartBadge.classList.remove('pulse');
+    void cartBadge.offsetWidth;
+    cartBadge.classList.add('pulse');
+    
+    // Remover la clase después de la animación
+    setTimeout(() => {
+      cartBadge.classList.remove('pulse');
+    }, 400);
+  }
+  
+  // Remover la clase de animación después de que termine
+  setTimeout(() => {
+    cartElement.classList.remove('animate-bounce', 'animate-shake', 'animate-bounce-shake', 'flash');
+  }, 700);
+}
+
+/**
+ * Actualiza el contador del carrito
+ * @param {boolean} animate - Si debe animar o no
+ */
+export function updateCartCount(animate = false) {
   const cartItems = getLocalStorage("so-cart") || [];
   const cartCount = cartItems.length;
   
@@ -176,8 +231,14 @@ export function updateCartCount() {
       }
     }
     if (badge) {
+      const oldCount = parseInt(badge.textContent) || 0;
       badge.textContent = cartCount;
       badge.style.display = 'flex';
+      
+      // Animar solo si el número cambió y se solicitó animación
+      if (animate && oldCount !== cartCount) {
+        animateCart('bounce-shake');
+      }
     }
   } else if (badge) {
     badge.style.display = 'none';

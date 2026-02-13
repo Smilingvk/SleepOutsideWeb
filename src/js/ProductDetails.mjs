@@ -1,4 +1,4 @@
-import { getLocalStorage, setLocalStorage, updateCartCount, alertMessage } from "./utils.mjs";
+import { getLocalStorage, setLocalStorage, updateCartCount, alertMessage, animateCart } from "./utils.mjs";
 import { loadHeaderFooter } from './utils.mjs';
 
 loadHeaderFooter();
@@ -37,10 +37,8 @@ export default class ProductDetails {
     cartItems.push(this.product);
     setLocalStorage("so-cart", cartItems);
     
-    // Update cart count badge
-    if (typeof updateCartCount === 'function') {
-      updateCartCount();
-    }
+    // ✨ ANIMAR EL CARRITO - Esta es la parte nueva!
+    updateCartCount(true); // El true activa la animación
     
     // Show success alert
     alertMessage(`${this.product.Name} has been added to your cart!`, false);
