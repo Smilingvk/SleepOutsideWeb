@@ -5,134 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sleep Outside | Checkout</title>
     <link rel="stylesheet" href="../css/style.css" />
-    <style>
-      .checkout-container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 1rem;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-      }
+    <script src="../js/checkout.js" type="module"></script>
 
-      @media screen and (max-width: 768px) {
-        .checkout-container {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .checkout-form {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .order-summary {
-        background: #f9f9f9;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        height: fit-content;
-      }
-
-      .form-section {
-        margin-bottom: 2rem;
-      }
-
-      .form-section h3 {
-        color: var(--secondary-color);
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid var(--primary-color);
-      }
-
-      .form-group {
-        margin-bottom: 1rem;
-      }
-
-      .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: bold;
-        color: var(--dark-grey);
-      }
-
-      .form-group input {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid var(--light-grey);
-        border-radius: 4px;
-        font-size: 1rem;
-      }
-
-      .form-group input:focus {
-        outline: none;
-        border-color: var(--primary-color);
-      }
-
-      .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-      }
-
-      .summary-line {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.75rem;
-      }
-
-      .summary-line.total {
-        border-top: 2px solid var(--primary-color);
-        padding-top: 0.75rem;
-        margin-top: 1rem;
-        font-weight: bold;
-        font-size: 1.2em;
-        color: var(--tertiary-color);
-      }
-
-      .checkout-button {
-        width: 100%;
-        padding: 1rem 2rem;
-        font-size: 1.1em;
-        margin-top: 1rem;
-      }
-
-      .alert {
-        padding: 1rem;
-        margin: 1rem 0;
-        border-radius: 4px;
-        display: none;
-      }
-
-      .alert.success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-      }
-
-      .alert.error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
-
-      .alert.show {
-        display: block;
-      }
-    </style>
   </head>
 
   <body>
     <header class="divider" id="main-header"></header>
 
-    <main class="divider">
+    <main>
       <div class="checkout-container">
         <!-- Checkout Form -->
-        <div class="checkout-form">
-          <h2>Checkout</h2>
+        <section class="checkout-form" aria-labelledby="checkout-title">
+          <h1 id="checkout-title">Checkout</h1>
 
           <div id="checkout-alert" class="alert"></div>
 
@@ -225,7 +109,7 @@
                   required
                   pattern="[0-9]{16}"
                   placeholder="1234123412341234"
-                  value="1234123412341234"
+
                 />
               </div>
               <div class="form-row">
@@ -237,7 +121,7 @@
                     name="expiration"
                     required
                     placeholder="12/25"
-                    value="12/25"
+
                   />
                 </div>
                 <div class="form-group">
@@ -250,7 +134,7 @@
                     pattern="[0-9]{3}"
                     maxlength="3"
                     placeholder="123"
-                    value="123"
+
                   />
                 </div>
               </div>
@@ -260,11 +144,10 @@
               Complete Purchase
             </button>
           </form>
-        </div>
+        </section>
 
-        <!-- Order Summary -->
-        <div class="order-summary">
-          <h2>Order Summary</h2>
+        <aside class="order-summary" aria-labelledby="summary-title">
+          <h2 id="summary-title">Order summary</h2>
 
           <div class="summary-line">
             <span>Subtotal <span id="item-count"></span></span>
@@ -286,14 +169,12 @@
             <span id="order-total">$0.00</span>
           </div>
 
-          <p style="margin-top: 2rem; font-size: 0.9em; color: #666">
-            * All fields are required
-          </p>
-        </div>
+          <p class="form-note">* All fields are required</p>
+        </aside>
       </div>
     </main>
 
     <footer id="main-footer"></footer>
-    <script src="../js/checkout.js" type="module"></script>
+
   </body>
 </html>

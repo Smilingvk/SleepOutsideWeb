@@ -15,13 +15,21 @@ function formDataToJSON(formElement) {
 
 // takes the items currently stored in the cart (localstorage) and returns them in a simplified form.
 function packageItems(items) {
-  // convert the list of products from localStorage to the simpler form required for the checkout process.
-  return items.map((item) => ({
-    id: item.Id,
-    name: item.Name,
-    price: item.FinalPrice,
-    quantity: 1, // You can modify this if you implement quantity tracking
-  }));
+  const grouped = new Map();
+  items.forEach((item) => {
+    const id = item.Id || item.Name;
+    const existing = grouped.get(id);
+    if (existing) existing.quantity += 1;
+    else {
+      grouped.set(id, {
+        id: item.Id,
+        name: item.Name,
+        price: item.FinalPrice,
+        quantity: 1,
+      });
+    }
+  });
+  return [...grouped.values()];
 }
 
 export default class CheckoutProcess {
@@ -142,13 +150,9 @@ export default class CheckoutProcess {
         tax: this.tax.toFixed(2),
       };
 
-      console.log("Order to submit:", order);
-
       // Create ExternalServices instance and submit the order
       const services = new ExternalServices();
       const response = await services.checkout(order);
-
-      console.log("Order response:", response);
 
       // Clear the cart after successful checkout
       setLocalStorage(this.key, []);

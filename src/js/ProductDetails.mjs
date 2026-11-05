@@ -1,13 +1,11 @@
-import { getLocalStorage, setLocalStorage, updateCartCount, alertMessage, animateCart } from "./utils.mjs";
-import { loadHeaderFooter } from './utils.mjs';
-
-loadHeaderFooter();
+import { getLocalStorage, setLocalStorage, updateCartCount, alertMessage } from "./utils.mjs";
+import productPlaceholder from "../images/product-placeholder.svg";
 
 function productDetailsTemplate(product) {
   return `
-    <h2>${product.Brand.Name}</h2>
-    <h3 class="divider">${product.NameWithoutBrand}</h3>
-    <img src="${product.Images.PrimaryLarge}" alt="${product.NameWithoutBrand}" id="productImage" class="divider" />
+    <p class="eyebrow">${product.Brand?.Name || "Outdoor gear"}</p>
+    <h2>${product.NameWithoutBrand || product.Name}</h2>
+    <img src="${product.Images?.PrimaryLarge || product.Images?.PrimaryMedium || product.Image || productPlaceholder}" data-fallback="${productPlaceholder}" alt="${product.NameWithoutBrand || product.Name}" id="productImage" class="divider" />
     <p id="productPrice" class="product-card__price">$${product.FinalPrice}</p>
     <p id="productColor" class="product__color">${product.Colors?.[0]?.ColorName || "N/A"}</p>
     <div id="productDesc" class="product__description">${product.DescriptionHtmlSimple}</div>
@@ -47,11 +45,11 @@ export default class ProductDetails {
     const button = document.getElementById("addToCart");
     const originalText = button.textContent;
     button.textContent = "Added!";
-    button.style.backgroundColor = "#4CAF50";
+    button.classList.add("is-added");
     
     setTimeout(() => {
       button.textContent = originalText;
-      button.style.backgroundColor = "";
+      button.classList.remove("is-added");
     }, 1500);
   }
 
@@ -59,6 +57,11 @@ export default class ProductDetails {
     const detailSection = document.querySelector(".product-detail");
     if (detailSection) {
       detailSection.innerHTML = productDetailsTemplate(this.product);
+      const image = detailSection.querySelector("#productImage");
+      image?.addEventListener("error", () => {
+        image.src = image.dataset.fallback;
+        image.removeAttribute("data-fallback");
+      }, { once: true });
     }
   }
 }

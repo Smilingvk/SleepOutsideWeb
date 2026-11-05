@@ -1,61 +1,51 @@
-import { loadHeaderFooter } from './utils.mjs';
-import { searchProducts } from './search.js';
+import { loadHeaderFooter } from "./utils.mjs";
+import { searchProducts } from "./search.js";
+import productPlaceholder from "../images/product-placeholder.svg";
 
-loadHeaderFooter();
+await loadHeaderFooter();
 
-function productCardTemplate(product) {
-  return `<li class="product-card">
-    <a href="../product_pages/?product=${product.Id}">
-      <img src="${product.Image}" alt="Image of ${product.Name}">
-      <h2 class="card__brand">${product.Brand.Name}</h2>
-      <h3 class="card__name">${product.NameWithoutBrand}</h3>
-      <p class="product-card__price">$${product.FinalPrice}</p>
-    </a>
-  </li>`;
+function escapeHTML(value = "") {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[char]);
 }
 
-async function displaySearchResults() {
-  const query = sessionStorage.getItem("searchQuery");
-  
-  if (!query) {
-    window.location.href = "../index.html";
-    return;
-  }
+const query = new URLSearchParams(window.location.search).get("search")?.trim();
+const title = document.getElementById("search-title");
+const info = document.getElementById("search-info");
+const productList = document.querySelector(".product-list");
+const noResults = document.getElementById("no-results");
 
-  // Update page title
-  const searchTitle = document.getElementById("search-title");
-  const searchInfo = document.getElementById("search-info");
-  searchTitle.textContent = `Search Results for "${query}"`;
-  searchInfo.innerHTML = `<p style="margin: 1rem 0;">Searching...</p>`;
-
+if (!query) {
+  window.location.replace("../index.html");
+} else {
+  title.textContent = `Results for “${query}”`;
+  info.textContent = "Searching the collection…";
   try {
     const results = await searchProducts(query);
-    
-    const productListElement = document.querySelector(".product-list");
-    const noResultsElement = document.getElementById("no-results");
-
-    if (results && results.length > 0) {
-      // Display results count
-      searchInfo.innerHTML = `<p style="margin: 1rem 0;">Found ${results.length} product${results.length !== 1 ? 's' : ''}</p>`;
-      
-      // Render products
-      const htmlItems = results.map(productCardTemplate).join("");
-      productListElement.innerHTML = htmlItems;
-      noResultsElement.style.display = "none";
+    info.textContent = `${results.length} product${results.length === 1 ? "" : "s"} found`;
+    if (!results.length) {
+      noResults.hidden = false;
     } else {
-      // No results found
-      searchInfo.innerHTML = "";
-      productListElement.innerHTML = "";
-      noResultsElement.style.display = "block";
+      productList.innerHTML = results.map((product) => `<li class="product-card">
+        <a href="../product_pages/?product=${encodeURIComponent(product.Id)}">
+          <img src="${escapeHTML(product.Images?.PrimaryLarge || product.Images?.PrimaryMedium || product.Image || productPlaceholder)}" data-fallback="${productPlaceholder}" alt="${escapeHTML(product.Name)}" loading="lazy">
+          <div class="product-card__body">
+            <p class="card__brand">${escapeHTML(product.Brand?.Name || "Outdoor gear")}</p>
+            <h3 class="card__name">${escapeHTML(product.NameWithoutBrand || product.Name)}</h3>
+            <p class="product-card__price">$${Number(product.FinalPrice || 0).toFixed(2)}</p>
+          </div>
+        </a>
+      </li>`).join("");
+      productList.querySelectorAll("img[data-fallback]").forEach((image) => {
+        image.addEventListener("error", () => {
+          image.src = image.dataset.fallback;
+          image.removeAttribute("data-fallback");
+        }, { once: true });
+      });
     }
   } catch (error) {
-    console.error("Error displaying search results:", error);
-    const searchInfo = document.getElementById("search-info");
-    searchInfo.innerHTML = `<p style="color: var(--tertiary-color); margin: 1rem 0;">
-      An error occurred while searching. Please try again.
-    </p>`;
+    console.error("Search failed:", error);
+    info.textContent = "Search is unavailable right now. Please try again.";
   }
 }
-
-// Initialize search results display
-displaySearchResults();

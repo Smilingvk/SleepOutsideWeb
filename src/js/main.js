@@ -2,8 +2,8 @@ import { loadHeaderFooter } from './utils.mjs';
 import ExternalServices from './ExternalServices.mjs';
 import ProductList from './ProductList.mjs';
 
-// Load header and footer
-loadHeaderFooter();
+// Load shared page chrome before initializing home page features
+await loadHeaderFooter();
 
 // Load featured products on home page
 const dataSource = new ExternalServices();

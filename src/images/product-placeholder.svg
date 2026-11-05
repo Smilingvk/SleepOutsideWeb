@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 520" role="img" aria-label="Camping gear illustration">
+  <rect width="640" height="520" rx="32" fill="#edf1e9"/>
+  <circle cx="500" cy="115" r="48" fill="#e9a34b" opacity=".85"/>
+  <path d="M0 330 150 190l113 110 120-150 257 208v162H0Z" fill="#cbd9c7"/>
+  <path d="m0 390 180-150 122 126 139-125 199 161v118H0Z" fill="#93ad91"/>
+  <path d="m154 405 160-174 166 174H154Z" fill="#234d3b"/>
+  <path d="m314 231 5 174m-5-174 73 174" fill="none" stroke="#f7f8f3" stroke-linecap="round" stroke-width="10"/>
+  <path d="M0 405h640v115H0Z" fill="#234d3b"/>
+  <path d="M62 445c72-25 140-25 207 0s136 25 208 0 111-23 163-4" fill="none" stroke="#d8e2d2" stroke-linecap="round" stroke-width="8" opacity=".75"/>
+</svg>

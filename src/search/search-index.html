@@ -11,18 +11,14 @@
   <body>
     <header class="divider" id="main-header"></header>
     
-    <main class="divider">
+    <main>
       <section class="products">
-        <h2 id="search-title">Search Results</h2>
-        <div id="search-info" style="padding: 0 1rem; color: var(--dark-grey);"></div>
+        <h1 id="search-title">Search results</h1>
+        <div id="search-info" class="search-info" aria-live="polite"></div>
         <ul class="product-list"></ul>
-        <div id="no-results" style="display: none; text-align: center; padding: 3rem 1rem;">
-          <p style="font-size: 1.2em; color: var(--dark-grey); margin-bottom: 1rem;">
-            No products found matching your search.
-          </p>
-          <a href="../index.html" style="color: var(--secondary-color); text-decoration: underline;">
-            Return to Home
-          </a>
+        <div id="no-results" class="no-results" hidden>
+          <p>No products found matching your search.</p>
+          <a class="text-link" href="../index.html">Return to home</a>
         </div>
       </section>
     </main>

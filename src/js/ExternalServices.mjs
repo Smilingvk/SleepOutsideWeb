@@ -2,7 +2,7 @@ const baseURL = "https://wdd330-backend.onrender.com/";
 
 async function convertToJson(res) {
   const jsonResponse = await res.json();
-  
+
   if (res.ok) {
     return jsonResponse;
   } else {
@@ -12,10 +12,10 @@ async function convertToJson(res) {
 
 export default class ExternalServices {
   async getData(category) {
-    console.log("🔍 Buscando productos para:", category);
-    const response = await fetch(`${baseURL}products/search/${category}`);
+
+    const response = await fetch(`${baseURL}products/search/${encodeURIComponent(category)}`);
     const data = await convertToJson(response);
-    console.log("✅ Productos encontrados:", data.Result.length);
+
     return data.Result;
   }
 

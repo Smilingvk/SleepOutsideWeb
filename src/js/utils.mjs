@@ -1,3 +1,6 @@
+import { searchProducts } from "./search.js";
+import productPlaceholder from "../images/product-placeholder.svg";
+
 // UTILS.MJS - GITHUB PAGES VERSION CON ANIMACIÓN DEL CARRITO
 
 export function qs(selector, parent = document) {
@@ -5,7 +8,12 @@ export function qs(selector, parent = document) {
 }
 
 export function getLocalStorage(key) {
-  return JSON.parse(localStorage.getItem(key));
+  try {
+    return JSON.parse(localStorage.getItem(key)) ?? null;
+  } catch (error) {
+    console.warn(`Could not read saved data for ${key}.`, error);
+    return null;
+  }
 }
 
 export function setLocalStorage(key, data) {
@@ -45,119 +53,125 @@ export async function loadTemplate(path) {
 }
 
 export async function loadHeaderFooter() {
+  const inSection = /\/(cart|checkout|product_pages|product_listing|search)\//.test(window.location.pathname);
+  const base = inSection ? "../" : "";
+  const headerElement = qs("#main-header");
+  const footerElement = qs("#main-footer");
+
   try {
-    const path = window.location.pathname;
-    let base = '';
-    
-    // Para GitHub Pages - detectar si estamos en subdirectorio
-    if (path.includes('/cart/') || 
-        path.includes('/checkout/') || 
-        path.includes('/product_pages/') || 
-        path.includes('/product_listing/')) {
-      base = '../';
-    }
-    
-    const headerTemplate = await loadTemplate(base + 'public/partials/header.html');
-    const footerTemplate = await loadTemplate(base + 'public/partials/footer.html');
-    
-    const headerElement = document.querySelector("#main-header");
-    const footerElement = document.querySelector("#main-footer");
-    
+    const [headerTemplate, footerTemplate] = await Promise.all([
+      loadTemplate(`${base}partials/header.html`),
+      loadTemplate(`${base}partials/footer.html`),
+    ]);
     if (headerElement) {
       renderWithTemplate(headerTemplate, headerElement);
-      // Inicializar funcionalidades del header después de cargarlo
+      const homeLink = headerElement.querySelector(".logo");
+      const logoImage = headerElement.querySelector(".logo img");
+      const cartLink = headerElement.querySelector("#cart-link");
+      const prefix = inSection ? "../" : "";
+      if (homeLink) homeLink.href = `${prefix}index.html`;
+      if (logoImage) logoImage.src = `${prefix}images/brand-icon.webp`;
+      if (cartLink) cartLink.href = window.location.pathname.includes("/cart/")
+        ? "index.html"
+        : `${prefix}cart/index.html`;
       initializeHeaderFeatures();
-      // Fix header links después de cargar
-      fixHeaderLinks();
     }
-    
-    if (footerElement) {
-      renderWithTemplate(footerTemplate, footerElement);
-    }
-    
+    if (footerElement) renderWithTemplate(footerTemplate, footerElement);
   } catch (error) {
-    console.error("Error loading header/footer:", error);
-  }
-}
-
-function fixHeaderLinks() {
-  const currentPath = window.location.pathname;
-  
-  // Fix logo link
-  const logoLink = document.querySelector('.logo a');
-  if (logoLink) {
-    if (currentPath.includes('/cart/') || 
-        currentPath.includes('/checkout/') || 
-        currentPath.includes('/product_pages/') || 
-        currentPath.includes('/product_listing/')) {
-      logoLink.href = '../index.html';
-    } else {
-      logoLink.href = 'index.html';
-    }
-  }
-  
-  // Fix logo image
-  const logoImg = document.querySelector('.logo img');
-  if (logoImg) {
-    if (currentPath.includes('/cart/') || 
-        currentPath.includes('/checkout/') || 
-        currentPath.includes('/product_pages/') || 
-        currentPath.includes('/product_listing/')) {
-      logoImg.src = '../images/noun_Tent_2517.svg';
-    } else {
-      logoImg.src = 'images/noun_Tent_2517.svg';
-    }
-  }
-  
-  // Fix cart link (esto lo hace el script en header.html, pero por si acaso)
-  const cartLink = document.getElementById('cart-link');
-  if (cartLink && !cartLink.href.includes('index.html')) {
-    let cartUrl = '';
-    
-    if (currentPath.includes('/cart/')) {
-      cartUrl = 'index.html';
-    } else if (currentPath.includes('/checkout/') || 
-               currentPath.includes('/product_pages/') || 
-               currentPath.includes('/product_listing/')) {
-      cartUrl = '../cart/index.html';
-    } else {
-      cartUrl = 'cart/index.html';
-    }
-    
-    cartLink.href = cartUrl;
+    console.error("Could not load shared page chrome:", error);
   }
 }
 
 function initializeHeaderFeatures() {
-  // Actualizar contador del carrito
   updateCartCount();
-  
-  // Inicializar búsqueda
-  const searchForm = document.getElementById('search-form');
-  const searchInput = document.getElementById('search-input');
-  
-  if (searchForm && searchInput) {
-    searchForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const query = searchInput.value.trim();
-      
-      if (query.length > 0) {
-        const currentPath = window.location.pathname;
-        let redirectUrl = "";
-        
-        // Detectar la ubicación actual y redirigir apropiadamente
-        if (currentPath.includes("index.html") || currentPath.endsWith("/") || !currentPath.includes("/")) {
-          redirectUrl = `product_listing/index.html?search=${encodeURIComponent(query)}`;
-        } else if (currentPath.includes("product_listing")) {
-          redirectUrl = `index.html?search=${encodeURIComponent(query)}`;
-        } else {
-          redirectUrl = `../product_listing/index.html?search=${encodeURIComponent(query)}`;
+  const searchForm = qs("#search-form");
+  const searchInput = qs("#search-input");
+  const suggestions = qs("#search-suggestions");
+  if (!searchForm || !searchInput) return;
+
+  let debounceTimer;
+  const closeSuggestions = () => {
+    if (suggestions) suggestions.hidden = true;
+    searchInput.setAttribute("aria-expanded", "false");
+  };
+  const showSuggestions = (content) => {
+    if (!suggestions) return;
+    suggestions.innerHTML = content;
+    suggestions.hidden = false;
+    searchInput.setAttribute("aria-expanded", "true");
+  };
+
+  searchInput.addEventListener("input", () => {
+    const query = searchInput.value.trim();
+    window.clearTimeout(debounceTimer);
+    if (!query) {
+      closeSuggestions();
+      return;
+    }
+
+    showSuggestions('<p class="search-suggestion-message">Searching products…</p>');
+    debounceTimer = window.setTimeout(async () => {
+      try {
+        const products = await searchProducts(query);
+        if (searchInput.value.trim() !== query) return;
+        if (!products.length) {
+          showSuggestions('<p class="search-suggestion-message">No matching products found.</p>');
+          return;
         }
-        
-        window.location.href = redirectUrl;
+
+        const inSection = /\/(cart|checkout|product_pages|product_listing|search)\//.test(window.location.pathname);
+        const productBase = `${inSection ? "../" : ""}product_pages/?product=`;
+        showSuggestions(products.slice(0, 6).map((product) => {
+          const image = product.Images?.PrimarySmall || product.Images?.PrimaryMedium || productPlaceholder;
+          return `<a class="search-suggestion" role="option" href="${productBase}${encodeURIComponent(product.Id)}">
+            <img src="${escapeHTML(image)}" alt="" data-fallback="${productPlaceholder}" />
+            <span class="search-suggestion__copy"><strong>${escapeHTML(product.Name)}</strong><small>${escapeHTML(product.Brand?.Name || "Outdoor gear")}</small></span>
+            <span class="search-suggestion__price">$${Number(product.FinalPrice || 0).toFixed(2)}</span>
+          </a>`;
+        }).join(""));
+
+        suggestions.querySelectorAll("img[data-fallback]").forEach((image) => {
+          image.addEventListener("error", () => {
+            image.src = image.dataset.fallback;
+            image.removeAttribute("data-fallback");
+          }, { once: true });
+        });
+      } catch (error) {
+        if (searchInput.value.trim() === query) {
+          showSuggestions('<p class="search-suggestion-message">Search is unavailable right now.</p>');
+        }
       }
-    });
-  }
+    }, 220);
+  });
+
+  searchInput.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeSuggestions();
+    if (event.key === "ArrowDown" && suggestions && !suggestions.hidden) {
+      event.preventDefault();
+      suggestions.querySelector("a")?.focus();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".search-container")) closeSuggestions();
+  });
+
+  searchForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const query = searchInput.value.trim();
+    if (!query) return;
+    closeSuggestions();
+    const inSection = /\/(cart|checkout|product_pages|product_listing|search)\//.test(window.location.pathname);
+    const target = window.location.pathname.includes("/product_listing/")
+      ? "index.html"
+      : `${inSection ? "../" : ""}product_listing/index.html`;
+    window.location.href = `${target}?search=${encodeURIComponent(query)}`;
+  });
+}
+
+function escapeHTML(value = "") {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[char]);
 }
 
 /**
@@ -246,28 +260,26 @@ export function updateCartCount(animate = false) {
 }
 
 export function alertMessage(message, scroll = true) {
-  // Create element to hold the alert
   const alert = document.createElement('div');
   alert.classList.add('alert');
-  
-  // Set the contents with message and close button
-  alert.innerHTML = `<p>${message}</p><span class="close-alert">X</span>`;
-  
-  // Add a listener to the alert to see if they clicked on the X
+  alert.setAttribute("role", "alert");
+  const text = document.createElement("p");
+  text.textContent = String(message).replace(/<br\s*\/?\s*>/gi, " ");
+  const close = document.createElement("button");
+  close.className = "close-alert";
+  close.type = "button";
+  close.setAttribute("aria-label", "Dismiss message");
+  close.textContent = "×";
+  alert.append(text, close);
   alert.addEventListener('click', function(e) {
     if (e.target.classList.contains('close-alert')) {
       this.remove();
     }
   });
-  
-  // Add the alert to the top of main
   const main = document.querySelector('main');
+  if (!main) return;
   main.prepend(alert);
-  
-  // Make sure they see the alert by scrolling to the top of the window
-  if (scroll) {
-    window.scrollTo(0, 0);
-  }
+  if (scroll) window.scrollTo(0, 0);
 }
 
 export function removeAllAlerts() {

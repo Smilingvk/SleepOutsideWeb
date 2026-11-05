@@ -1,97 +1,104 @@
-import { loadHeaderFooter } from "./utils.mjs";
-loadHeaderFooter();
+import { loadHeaderFooter, getLocalStorage, setLocalStorage, updateCartCount } from "./utils.mjs";
+import productPlaceholder from "../images/product-placeholder.svg";
 
-import { getLocalStorage } from "./utils.mjs";
+await loadHeaderFooter();
+
+const list = document.querySelector(".cart-list");
+const productsSection = document.querySelector(".products");
+
+function escapeHTML(value = "") {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[char]);
+}
+
+function productImage(item) {
+  return item.Images?.PrimaryMedium || item.Images?.PrimarySmall || item.Image || productPlaceholder;
+}
+
+function groupCartItems(items) {
+  const groups = new Map();
+  items.forEach((item) => {
+    const key = String(item.Id || item.Name);
+    if (!groups.has(key)) groups.set(key, { item, quantity: 0 });
+    groups.get(key).quantity += 1;
+  });
+  return [...groups.entries()].map(([id, group]) => ({ id, ...group }));
+}
 
 function renderCartContents() {
-  const cartItems = getLocalStorage("so-cart") || [];
-  const productListElement = document.querySelector(".product-list");
-  
-  // Check if cart is empty
-  if (cartItems.length === 0) {
-    productListElement.innerHTML = `
-      <div style="text-align: center; padding: 2rem; color: var(--dark-grey);">
-        <p style="font-size: 1.2em; margin-bottom: 1rem;">Your cart is empty</p>
-        <a href="../index.html" style="color: var(--secondary-color); text-decoration: underline;">
-          Continue Shopping
-        </a>
-      </div>
-    `;
-    // Hide cart total section if it exists
-    const cartFooter = document.querySelector('.cart-footer');
-    if (cartFooter) {
-      cartFooter.style.display = 'none';
-    }
+  const items = getLocalStorage("so-cart") || [];
+  const groups = groupCartItems(items);
+  const previousSummary = productsSection.querySelector(".cart-footer");
+  previousSummary?.remove();
+
+  if (!groups.length) {
+    list.innerHTML = `<li class="empty-state">
+      <h2>Your cart is waiting for an adventure.</h2>
+      <p>Explore the collection and find the gear for your next night outside.</p>
+      <a class="button" href="../product_listing/index.html?category=tents">Explore gear</a>
+    </li>`;
     return;
   }
-  
-  // Render cart items
-  const htmlItems = cartItems.map((item) => cartItemTemplate(item));
-  productListElement.innerHTML = htmlItems.join("");
-  
-  // Calculate and display total
-  renderCartTotal(cartItems);
-}
 
-function cartItemTemplate(item) {
-  const newItem = `<li class="cart-card divider">
-  <a href="#" class="cart-card__image">
-    <img
-      src="${item.Image}"
-      alt="${item.Name}"
-    />
-  </a>
-  <a href="#">
-    <h2 class="card__name">${item.Name}</h2>
-  </a>
-  <p class="cart-card__color">${item.Colors[0].ColorName}</p>
-  <p class="cart-card__quantity">qty: 1</p>
-  <p class="cart-card__price">$${item.FinalPrice}</p>
-</li>`;
-
-  return newItem;
-}
-
-function renderCartTotal(cartItems) {
-  // Calculate total
-  const total = cartItems.reduce((sum, item) => sum + item.FinalPrice, 0);
-  const itemCount = cartItems.length;
-  
-  // Check if cart footer already exists
-  let cartFooter = document.querySelector('.cart-footer');
-  
-  if (!cartFooter) {
-    // Create cart footer section
-    cartFooter = document.createElement('div');
-    cartFooter.className = 'cart-footer';
-    cartFooter.style.cssText = `
-      margin-top: 2rem;
-      padding: 1rem;
-      border-top: 2px solid var(--primary-color);
-      text-align: right;
-    `;
-    
-    // Insert after product list
-    const productSection = document.querySelector('.products');
-    productSection.appendChild(cartFooter);
-  }
-  
-  // Update cart footer content
-  cartFooter.innerHTML = `
-    <p style="font-size: 1.1em; margin-bottom: 0.5rem;">
-      <strong>Items in Cart:</strong> ${itemCount}
-    </p>
-    <p style="font-size: 1.3em; color: var(--tertiary-color); font-weight: bold; margin-bottom: 1rem;">
-      <strong>Total:</strong> $${total.toFixed(2)}
-    </p>
-    <a href="../checkout/index.html" style="display: inline-block; margin-top: 1rem;">
-      <button style="padding: 1rem 3rem; font-size: 1.1em; cursor: pointer;">
-        Proceed to Checkout
-      </button>
+  list.innerHTML = groups.map(({ id, item, quantity }) => `<li class="cart-card">
+    <a href="../product_pages/?product=${encodeURIComponent(item.Id)}" class="cart-card__image" aria-label="View ${escapeHTML(item.Name)}">
+      <img src="${escapeHTML(productImage(item))}" data-fallback="${productPlaceholder}" alt="${escapeHTML(item.Name)}" loading="lazy" />
     </a>
-  `;
-  
-  cartFooter.style.display = 'block';
+    <div class="cart-card__details">
+      <h2><a href="../product_pages/?product=${encodeURIComponent(item.Id)}">${escapeHTML(item.Name)}</a></h2>
+      <p>${escapeHTML(item.Colors?.[0]?.ColorName || "")}</p>
+      <div class="quantity-control" aria-label="Quantity for ${escapeHTML(item.Name)}">
+        <button type="button" class="quantity-button" data-action="decrease" data-id="${escapeHTML(id)}" aria-label="Decrease quantity" title="Decrease quantity">−</button>
+        <output class="quantity-value" aria-live="polite">${quantity}</output>
+        <button type="button" class="quantity-button" data-action="increase" data-id="${escapeHTML(id)}" aria-label="Increase quantity" title="Increase quantity">+</button>
+      </div>
+      <button type="button" class="remove-item" data-action="remove" data-id="${escapeHTML(id)}">Remove item</button>
+    </div>
+    <p class="cart-card__price">$${Number(item.FinalPrice || 0).toFixed(2)} <span>each</span></p>
+  </li>`).join("");
+
+  list.querySelectorAll("img[data-fallback]").forEach((image) => {
+    image.addEventListener("error", () => {
+      image.src = image.dataset.fallback;
+      image.removeAttribute("data-fallback");
+    }, { once: true });
+  });
+
+  const total = items.reduce((sum, item) => sum + Number(item.FinalPrice || 0), 0);
+  const itemCount = items.length;
+  const summary = document.createElement("div");
+  summary.className = "cart-footer";
+  summary.innerHTML = `<p>${itemCount} item${itemCount === 1 ? "" : "s"}</p>
+    <p class="cart-total">Total: $${total.toFixed(2)}</p>
+    <a class="button" href="../checkout/index.html">Continue to checkout</a>`;
+  productsSection.append(summary);
 }
+
+list.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+
+  const items = getLocalStorage("so-cart") || [];
+  const id = button.dataset.id;
+  const matchingIndexes = items.reduce((indexes, item, index) => {
+    if (String(item.Id || item.Name) === id) indexes.push(index);
+    return indexes;
+  }, []);
+  if (!matchingIndexes.length) return;
+
+  if (button.dataset.action === "remove") {
+    setLocalStorage("so-cart", items.filter((item) => String(item.Id || item.Name) !== id));
+  } else if (button.dataset.action === "increase") {
+    items.push(items[matchingIndexes[0]]);
+    setLocalStorage("so-cart", items);
+  } else if (button.dataset.action === "decrease") {
+    items.splice(matchingIndexes[matchingIndexes.length - 1], 1);
+    setLocalStorage("so-cart", items);
+  }
+
+  renderCartContents();
+  updateCartCount();
+});
 
 renderCartContents();

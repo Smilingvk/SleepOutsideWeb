@@ -1,0 +1,1 @@
+import{l as o}from"./utils-DSK5HyOz.js";import{E as r}from"./ExternalServices-DAeCCKjG.js";import{P as e}from"./ProductList-Wna5wou-.js";await o();const i=new r,t=document.querySelector(".product-list");t&&new e("tents",i,t).init();

@@ -6,96 +6,64 @@
     <title>Sleep Outside | Home</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/main.js" type="module"></script>
-    <style>
-      .categories {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 2rem;
-        padding: 2rem 1rem;
-        margin-top: 2rem;
-      }
-      
-      .category-card {
-        flex: 1 1 200px;
-        max-width: 250px;
-        text-align: center;
-        text-decoration: none;
-        color: var(--dark-grey);
-        transition: transform 0.2s;
-        border: 2px solid var(--light-grey);
-        padding: 1.5rem;
-        border-radius: 8px;
-      }
-      
-      .category-card:hover {
-        transform: scale(1.05);
-        border-color: var(--primary-color);
-      }
-      
-      .category-card img {
-        width: 100%;
-        max-width: 120px;
-        height: 120px;
-        margin: 0 auto 1rem;
-        fill: var(--secondary-color);
-      }
-      
-      .category-card h3 {
-        margin: 0;
-        font-size: 1.3em;
-        color: var(--secondary-color);
-      }
-    </style>
+
   </head>
 
   <body>
     <header class="divider" id="main-header"></header>
     <main class="divider">
-      <div class="hero">
+      <section class="hero" aria-labelledby="hero-title">
         <img
           src="images/banner-sm.jpg"
-          srcset="images/banner-sm.jpg 500w, images/banner.jpg"
-          alt="image of a high mountain lake"
+          srcset="images/banner-sm.jpg 500w, images/banner.jpg 1200w"
+          sizes="(max-width: 600px) 100vw, 1200px"
+          alt="A quiet alpine lake surrounded by mountains"
         />
-        <div class="logo logo--square">
-          <img src="images/noun_Tent_2517.svg" alt="tent image for logo" />
-          <div>Sleep<span class="highlight">Outside</span></div>
+        <div class="hero-copy">
+          <p class="eyebrow">Find your next campsite</p>
+          <h1 id="hero-title">Make room for the outdoors.</h1>
+          <p>Thoughtful camping gear for slow mornings, long trails, and nights under the stars.</p>
+          <a class="button button--light" href="product_listing/index.html?category=tents">Shop the collection</a>
         </div>
-        <div class="mission">
-          <p>
-            Our mission is to provide you with everything you need to sleep
-            outside comfortably at an affordable price.
-          </p>
+      </section>
+      <section class="categories-section" aria-labelledby="categories-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Pack for the journey</p>
+            <h2 id="categories-title">Shop by category</h2>
+          </div>
         </div>
-      </div>
-
-      <!-- Categories Section -->
-      <section class="categories">
+        <div class="categories">
         <a href="product_listing/index.html?category=tents" class="category-card">
-          <img src="https://byui-cse.github.io/wdd330-ww-course/images/category-tents.svg" alt="Tents category icon"/>
+          <span class="category-art"><img src="images/categories/tents.webp" alt="" loading="lazy" /></span>
           <h3>Tents</h3>
         </a>
-              
+
         <a href="product_listing/index.html?category=backpacks" class="category-card">
-          <img src="https://byui-cse.github.io/wdd330-ww-course/images/category-backpacks.svg" alt="Backpacks category icon"/>
+          <span class="category-art"><img src="images/categories/backpacks.webp" alt="" loading="lazy" /></span>
           <h3>Backpacks</h3>
         </a>
-        
+
         <a href="product_listing/index.html?category=sleeping-bags" class="category-card">
-          <img src="https://byui-cse.github.io/wdd330-ww-course/images/category-sleepingbags.svg" alt="Sleeping Bags category icon"/>
+          <span class="category-art"><img src="images/categories/sleeping-bags.webp" alt="" loading="lazy" /></span>
           <h3>Sleeping Bags</h3>
         </a>
-        
+
         <a href="product_listing/index.html?category=hammocks" class="category-card">
-          <img src="https://byui-cse.github.io/wdd330-ww-course/images/category-hammocks.svg" alt="Hammocks category icon"/>
+          <span class="category-art"><img src="images/categories/hammocks.webp" alt="" loading="lazy" /></span>
           <h3>Hammocks</h3>
         </a>
+        </div>
       </section>
 
-      <!-- Top Products Section -->
-      <section class="products">
-        <h2>Top Products</h2>
+      <section class="products" aria-labelledby="featured-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Field favorites</p>
+            <h2 id="featured-title">Featured tents</h2>
+          </div>
+          <a class="text-link" href="product_listing/index.html?category=tents">View all tents →</a>
+        </div>
         <ul class="product-list"></ul>
       </section>
     </main>
